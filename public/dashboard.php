@@ -208,10 +208,9 @@ $titulo = 'Dashboard - Finca Cafetera';
             </div>
         </div>
 
-        <div class="row">
-            <!-- Columna izquierda: Actividad Reciente -->
-            <div class="col-lg-8 mb-4">
-                <!-- Actividad Reciente -->
+        <!-- Actividad Reciente - Full Width -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header bg-white">
                         <h4 class="section-title mb-0">📋 Actividad Reciente</h4>
@@ -250,43 +249,39 @@ $titulo = 'Dashboard - Finca Cafetera';
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Columna derecha: Top Clientes y Lotes -->
-            <div class="col-lg-4">
-                <!-- Top Clientes -->
-                <?php if (!empty($topClientes)): ?>
-                <div class="card mb-4">
+        <!-- Recordatorios - Full Width -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
                     <div class="card-header bg-white">
-                        <h4 class="section-title mb-0">🏆 Top Clientes</h4>
+                        <h4 class="section-title mb-0">🔔 Recordatorios</h4>
                     </div>
                     <div class="card-body">
-                        <?php foreach ($topClientes as $index => $cliente): ?>
-                        <div class="mini-card">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="mb-1">
-                                        <?= $index + 1 ?>. 
-                                        <?= $cliente['nombres'] ? 
-                                            $cliente['nombres'] . ' ' . $cliente['apellidos'] : 
-                                            $cliente['razon_social'] ?>
-                                    </h6>
-                                    <small class="text-muted">
-                                        $<?= number_format($cliente['total_compras_monto'] ?? 0, 0, ',', '.') ?>
-                                    </small>
-                                </div>
-                                <span class="badge bg-success">
-                                    <?= number_format($cliente['total_kilos'] ?? 0, 0, ',', '.') ?> kg
-                                </span>
-                            </div>
+                        <?php if ($jornalesPendientes > 0): ?>
+                        <div class="alert alert-warning">
+                            <strong>📋 Pendiente:</strong> Tienes <?= $jornalesPendientes ?> pagos de jornales pendientes.
                         </div>
-                        <?php endforeach; ?>
+                        <?php endif; ?>
+                        
+                        <div class="alert alert-info">
+                            <strong>📊 Reporte:</strong> Genera el reporte mensual para análisis.
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <strong>✅ Sistema:</strong> Todas las funcionalidades activas.
+                        </div>
                     </div>
                 </div>
-                <?php endif; ?>
+            </div>
+        </div>
 
-                <!-- Lotes Activos -->
+        <!-- Lotes Activos - Full Width -->
+        <div class="row mb-4">
+            <div class="col-12">
                 <?php if (!empty($proximasCosechas)): ?>
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-header bg-white">
                         <h4 class="section-title mb-0">🌱 Lotes Activos</h4>
                     </div>
@@ -308,28 +303,6 @@ $titulo = 'Dashboard - Finca Cafetera';
                     </div>
                 </div>
                 <?php endif; ?>
-
-                <!-- Recordatorios -->
-                <div class="card">
-                    <div class="card-header bg-white">
-                        <h4 class="section-title mb-0">🔔 Recordatorios</h4>
-                    </div>
-                    <div class="card-body">
-                        <?php if ($jornalesPendientes > 0): ?>
-                        <div class="alert alert-warning">
-                            <strong>📋 Pendiente:</strong> Tienes <?= $jornalesPendientes ?> pagos de jornales pendientes.
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="alert alert-info">
-                            <strong>📊 Reporte:</strong> Genera el reporte mensual para análisis.
-                        </div>
-                        
-                        <div class="alert alert-success">
-                            <strong>✅ Sistema:</strong> Todas las funcionalidades activas.
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

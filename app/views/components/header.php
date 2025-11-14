@@ -15,90 +15,145 @@ $usuario = $_SESSION['usuario'] ?? null;
     <title><?= $titulo ?? 'Finca Cafetera' ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .navbar {
+            padding: 0.8rem 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.4rem;
+            margin-right: 2rem;
+        }
+        
+        .navbar-nav {
+            align-items: center;
+        }
+        
+        .nav-link {
+            padding: 0.5rem 1rem !important;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: #ffd700 !important;
+        }
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+            color: #8b4513;
+        }
+        
+        .navbar-nav .dropdown-menu-end {
+            right: 0 !important;
+            left: auto !important;
+        }
+        
+        @media (max-width: 991px) {
+            .nav-link {
+                padding: 0.5rem 0 !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #8b4513;">
-        <div class="container">
+        <div class="container-fluid">
             <a class="navbar-brand" href="dashboard.php">
                 <strong>☕ Finca Cafetera</strong>
             </a>
             
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="dashboard.php">🏠 Dashboard</a>
+                        <a class="nav-link" href="dashboard.php"><span>🏠</span> <span>Dashboard</span></a>
                     </li>
                     
                     <!-- Gestión de Personal -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            👥 Gestión de Personal
+                        <a class="nav-link dropdown-toggle" href="#" id="personalDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>👥</span> <span>Personal</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="empleados.php">📋 Empleados</a></li>
-                            <li><a class="dropdown-item" href="jornales.php">⏱️ Jornales</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="personalDropdown">
+                            <li><a class="dropdown-item" href="empleados.php"><span>📋</span> <span>Empleados</span></a></li>
+                            <li><a class="dropdown-item" href="jornales.php"><span>⏱️</span> <span>Jornales</span></a></li>
                         </ul>
                     </li>
                     
                     <!-- Gestión Financiera -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            💰 Gestión Financiera
+                        <a class="nav-link dropdown-toggle" href="#" id="financieraDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>💰</span> <span>Financiera</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="ingresos.php">💰 Ingresos</a></li>
-                            <li><a class="dropdown-item" href="egresos.php">💸 Egresos</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="financieraDropdown">
+                            <li><a class="dropdown-item" href="ingresos.php"><span>💵</span> <span>Ingresos</span></a></li>
+                            <li><a class="dropdown-item" href="egresos.php"><span>💸</span> <span>Egresos</span></a></li>
                         </ul>
                     </li>
                     
                     <!-- Producción y Ventas -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            🌱 Producción y Ventas
+                        <a class="nav-link dropdown-toggle" href="#" id="produccionDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>🌱</span> <span>Producción</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="cosechas.php">🌱 Cosechas</a></li>
-                            <li><a class="dropdown-item" href="ventas.php">🛒 Ventas</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="produccionDropdown">
+                            <li><a class="dropdown-item" href="cosechas.php"><span>🌾</span> <span>Cosechas</span></a></li>
+                            <li><a class="dropdown-item" href="ventas.php"><span>🛒</span> <span>Ventas</span></a></li>
                         </ul>
                     </li>
                     
                     <!-- Catálogos -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            📚 Catálogos
+                        <a class="nav-link dropdown-toggle" href="#" id="catalogosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>📚</span> <span>Catálogos</span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="clientes.php">👥 Clientes</a></li>
+                        <ul class="dropdown-menu" aria-labelledby="catalogosDropdown">
+                            <li><a class="dropdown-item" href="clientes.php"><span>👥</span> <span>Clientes</span></a></li>
                         </ul>
                     </li>
                     
                     <!-- Reportes -->
                     <li class="nav-item">
-                        <a class="nav-link" href="reportes.php">📊 Reportes</a>
+                        <a class="nav-link" href="reportes.php"><span>📊</span> <span>Reportes</span></a>
                     </li>
                 </ul>
                 
                 <?php if ($usuario): ?>
-                <div class="navbar-nav">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            👋 <?= htmlspecialchars($usuario['nombre_completo']) ?>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="usuarioDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span>👤</span> <span><?= htmlspecialchars($usuario['nombre_completo']) ?></span>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="usuarioDropdown">
                             <li><span class="dropdown-item-text">
                                 <small>Rol: <span class="badge bg-primary"><?= ucfirst($usuario['rol']) ?></span></small>
                             </span></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="../app/controllers/AuthController.php?action=logout">
-                                🚪 Cerrar sesión
+                                <span>🚪</span> <span>Cerrar sesión</span>
                             </a></li>
                         </ul>
-                    </div>
-                </div>
+                    </li>
+                </ul>
                 <?php endif; ?>
             </div>
         </div>

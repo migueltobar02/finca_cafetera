@@ -29,7 +29,7 @@ class JornalesController {
     }
 
     public function obtenerActividades() {
-        return $this->actividadModel->getAll();
+        return $this->actividadModel->getActividadesActivas();
     }
 
     public function getJornalesPorFecha($fecha) {
