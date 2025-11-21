@@ -2,5 +2,5 @@
 builder = "dockerfile"
 
 [deploy]
-healthcheckPath = "/index.php"
+healthcheckPath = "/public/index.php"
 restartPolicyType = "ON_FAILURE"
