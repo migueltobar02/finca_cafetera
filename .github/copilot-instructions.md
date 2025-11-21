@@ -121,6 +121,20 @@ Models con `$softDelete = true` (default):
 - Header define menú con dropdowns para módulos (Personal, Operacional, Financiero)
 - Links en header: `dashboard.php`, `clientes.php`, `empleados.php`, etc.
 - Todos los controladores cargan automáticamente via `require_once` en vistas
+- Navbar optimizado con flexbox para alineación de iconos y texto
+
+### Performance & Optimization
+
+- **Lazy Loading**: Implementado para imágenes (nativo), contenido dinámico (Intersection Observer), y tablas (paginación)
+- Ver `LAZY_LOADING_GUIDE.md` para documentación completa
+- Funciones disponibles: `loadSectionData()`, `loadTablePage()`, `prefetchResource()`, `preloadResource()`
+
+### Seguridad (AuthController)
+
+- Validación contra SQL injection: sanitización de entrada, prepared statements
+- Rate limiting: máx 5 intentos de login = bloqueo 15 minutos
+- Hasheo de contraseñas con `password_hash(PASSWORD_DEFAULT)`
+- Logging de intentos (exitosos y fallidos)
 
 ### Existing Modules
 
@@ -129,6 +143,40 @@ Models con `$softDelete = true` (default):
 - **Financiero**: Ingresos, Egresos, Ventas
 - **Administrativo**: Clientes, Proveedores, Reportes
 
+## Security Features
+
+### CSRF Protection (Cross-Site Request Forgery)
+
+- Token `_csrf_token` requerido en todos los formularios POST
+- Generar con `SecurityManager::generateCSRFToken()` o helper `csrfToken()`
+- Validar en controladores con `SecurityManager::validateCSRFFromRequest()`
+- Tokens válidos por 1 hora, luego expiran automáticamente
+
+### XSS Protection (Cross-Site Scripting)
+
+- Sanitizar entrada: `SecurityManager::sanitizeInput($data, 'type')`
+- Escapar salida en HTML: `SecurityManager::escapeHTML($var)`
+- En atributos: `SecurityManager::escapeAttribute($var)`
+- En JSON: `SecurityManager::escapeJSON($data)`
+- Tipos soportados: `text`, `email`, `url`, `int`, `float`, `html`
+
+### Cookie Management & Remember Me
+
+- Gestión segura con `SecurityManager::setCookie()`, `getCookie()`, `deleteCookie()`
+- Todos los cookies con atributos: HttpOnly, Secure, SameSite=Strict
+- Remember Me: 30 días de auto-login con validación de token
+- Métodos: `setRememberMeCookie($userId, $token, $days)`, `getRememberMeCookie()`, `validateRememberMeCookie()`
+- Cifrado de valores con `encryptCookieValue()` y `decryptCookieValue()`
+- Configuración automática: `SecurityManager::configureSessionCookies()` en cada página
+- Ver `COOKIES_GUIDE.md` para patrones de implementación
+
+### Security Headers
+
+- Automáticos en cada página via `SecurityManager::setSecurityHeaders()`
+- Incluye X-Frame-Options, CSP, X-XSS-Protection, etc.
+
+Ver `SECURITY_GUIDE.md` para documentación completa y ejemplos.
+
 ## Tips for Agents
 
 1. **Check Model inheritance** - la mayoría de CRUD logic ya existe en `Model.php`
@@ -136,3 +184,5 @@ Models con `$softDelete = true` (default):
 3. **Session is shared** - todas las vistas acceden a `$_SESSION['usuario']`, no pasar como parámetro
 4. **No dependencies** - código usa solo PHP vanilla + PDO, sin Composer/librerías externas
 5. **Data flow**: View → Controller → Model → Database → Controller → View (no queries en vistas)
+6. **Lazy loading** - usar `data-lazy-load` para contenido dinámico, `loading="lazy"` para imágenes
+7. **Security** - validar y sanitizar siempre entrada del usuario, usar prepared statements

@@ -28,4 +28,5 @@ spl_autoload_register(function ($className) {
 // Incluir manualmente las clases esenciales si es necesario
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/models/Database.php';
+require_once __DIR__ . '/models/SecurityManager.php';
 ?>
