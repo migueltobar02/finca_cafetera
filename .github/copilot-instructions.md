@@ -7,12 +7,14 @@
 ### Directory Structure
 
 - **`app/autoload.php`** - Autocargador PSR-4 que resuelve clases desde `models/` y `controllers/`
-- **`app/config/database.php`** - Configuración de conexión MySQL (estática, sin env file)
+- **`app/config/database.php`** - Configuración de conexión MySQL con variables de entorno
+- **`app/helpers/EnvLoader.php`** - Cargador de variables de entorno desde `.env`
 - **`app/models/`** - Lógica de negocio con patrón **Singleton para Database**
 - **`app/controllers/`** - Manejo de peticiones y orquestación de modelos
 - **`app/views/`** - Componentes reutilizables (solo `header.php` y formularios)
 - **`public/`** - Puntos de entrada (entry points) que requieren autenticación
 - **`database/`** - Schema SQL inicial
+- **`.env`** - Variables de entorno (NO versionado, usar `.env.example` como referencia)
 
 ### Key Architectural Decisions
 
@@ -28,14 +30,22 @@
    - `Database.php` implementa singleton con lazy initialization
    - Todas las conexiones usan la misma instancia de PDO
    - Conexión se establece en constructor privado al primer acceso
+   - Credenciales cargadas desde variables de entorno via `DatabaseConfig::getConfig()`
 
-3. **Authentication Model**:
+3. **Environment Variables** (`.env`):
+
+   - Variables: `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`
+   - Cargadas automáticamente por `EnvLoader::load()` en `database.php`
+   - Valores por defecto: localhost:3306, root sin contraseña, base `finca_cafetera`
+   - Ver `ENV_GUIDE.md` para documentación completa
+
+4. **Authentication Model**:
 
    - Session-based con `$_SESSION['usuario']` almacenando `[id, username, nombre_completo, rol]`
    - Verificación de autenticación en `AuthController::checkAuth()` redirige a login
    - Contraseñas hasheadas con `password_hash(PASSWORD_DEFAULT)`
 
-4. **View Layer**:
+5. **View Layer**:
    - Vistas son archivos PHP directamente en `public/` (no existe template engine)
    - Componente `header.php` incluido via `include` y usa `$usuario` de sesión
    - Formularios separados: `cliente_form.php`, `empleados/form.php`, etc.
@@ -121,6 +131,20 @@ Models con `$softDelete = true` (default):
 - Header define menú con dropdowns para módulos (Personal, Operacional, Financiero)
 - Links en header: `dashboard.php`, `clientes.php`, `empleados.php`, etc.
 - Todos los controladores cargan automáticamente via `require_once` en vistas
+- Navbar optimizado con flexbox para alineación de iconos y texto
+
+### Performance & Optimization
+
+- **Lazy Loading**: Implementado para imágenes (nativo), contenido dinámico (Intersection Observer), y tablas (paginación)
+- Ver `LAZY_LOADING_GUIDE.md` para documentación completa
+- Funciones disponibles: `loadSectionData()`, `loadTablePage()`, `prefetchResource()`, `preloadResource()`
+
+### Seguridad (AuthController)
+
+- Validación contra SQL injection: sanitización de entrada, prepared statements
+- Rate limiting: máx 5 intentos de login = bloqueo 15 minutos
+- Hasheo de contraseñas con `password_hash(PASSWORD_DEFAULT)`
+- Logging de intentos (exitosos y fallidos)
 
 ### Existing Modules
 
@@ -129,6 +153,51 @@ Models con `$softDelete = true` (default):
 - **Financiero**: Ingresos, Egresos, Ventas
 - **Administrativo**: Clientes, Proveedores, Reportes
 
+## Security Features
+
+### CSRF Protection (Cross-Site Request Forgery)
+
+- Token `_csrf_token` requerido en todos los formularios POST
+- Generar con `SecurityManager::generateCSRFToken()` o helper `csrfToken()`
+- Validar en controladores con `SecurityManager::validateCSRFFromRequest()`
+- Tokens válidos por 1 hora, luego expiran automáticamente
+
+### XSS Protection (Cross-Site Scripting)
+
+- Sanitizar entrada: `SecurityManager::sanitizeInput($data, 'type')`
+- Escapar salida en HTML: `SecurityManager::escapeHTML($var)`
+- En atributos: `SecurityManager::escapeAttribute($var)`
+- En JSON: `SecurityManager::escapeJSON($data)`
+- Tipos soportados: `text`, `email`, `url`, `int`, `float`, `html`
+
+### Cookie Management & Remember Me
+
+- Gestión segura con `SecurityManager::setCookie()`, `getCookie()`, `deleteCookie()`
+- Todos los cookies con atributos: HttpOnly, Secure, SameSite=Strict
+- Remember Me: 30 días de auto-login con validación de token
+- Métodos: `setRememberMeCookie($userId, $token, $days)`, `getRememberMeCookie()`, `validateRememberMeCookie()`
+- Cifrado de valores con `encryptCookieValue()` y `decryptCookieValue()`
+- Configuración automática: `SecurityManager::configureSessionCookies()` en cada página
+- Ver `COOKIES_GUIDE.md` para patrones de implementación
+
+### Security Headers
+
+- Automáticos en cada página via `SecurityManager::setSecurityHeaders()`
+- Incluye X-Frame-Options, CSP, X-XSS-Protection, etc.
+
+Ver `SECURITY_GUIDE.md` para documentación completa y ejemplos.
+
+## Environment Variables
+
+### Configuration with EnvLoader
+
+- Variables almacenadas en archivo `.env` (NO versionado en git)
+- `EnvLoader::load()` carga automáticamente en constructor de `DatabaseConfig`
+- Acceso: `EnvLoader::get('MYSQLHOST', 'default_value')`
+- Verificar existencia: `EnvLoader::has('MYSQLHOST')`
+- Valores esperados: `MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`
+- Ver `ENV_GUIDE.md` para guía de configuración completa
+
 ## Tips for Agents
 
 1. **Check Model inheritance** - la mayoría de CRUD logic ya existe en `Model.php`
@@ -136,3 +205,5 @@ Models con `$softDelete = true` (default):
 3. **Session is shared** - todas las vistas acceden a `$_SESSION['usuario']`, no pasar como parámetro
 4. **No dependencies** - código usa solo PHP vanilla + PDO, sin Composer/librerías externas
 5. **Data flow**: View → Controller → Model → Database → Controller → View (no queries en vistas)
+6. **Lazy loading** - usar `data-lazy-load` para contenido dinámico, `loading="lazy"` para imágenes
+7. **Security** - validar y sanitizar siempre entrada del usuario, usar prepared statements

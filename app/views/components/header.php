@@ -2,9 +2,12 @@
 /**
  * Header común para todas las páginas
  */
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../../../app/models/SecurityManager.php';
+
+// Inicializar seguridad
+SecurityManager::initSession();
+SecurityManager::setSecurityHeaders();
+
 $usuario = $_SESSION['usuario'] ?? null;
 ?>
 <!DOCTYPE html>
@@ -155,6 +158,19 @@ $usuario = $_SESSION['usuario'] ?? null;
                     </li>
                 </ul>
                 <?php endif; ?>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Helper function para CSRF token en formularios -->
+    <?php
+    if (!function_exists('csrfToken')) {
+        function csrfToken() {
+            $token = SecurityManager::getCSRFToken();
+            return '<input type="hidden" name="_csrf_token" value="' . SecurityManager::escapeAttribute($token) . '">';
+        }
+    }
+    ?>
             </div>
         </div>
     </nav>

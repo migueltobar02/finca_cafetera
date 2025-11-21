@@ -1,0 +1,14 @@
+.github/
+
+COOKIES_GUIDE.md
+
+LAZY_LOADING_GUIDE.md
+
+SECURITY_GUIDE.md
+
+ENV_GUIDE.md
+
+# Environment variables (credenciales sensibles)
+.env
+.env.local
+.env.*.local

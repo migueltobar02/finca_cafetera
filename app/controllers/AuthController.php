@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/Usuario.php';
+require_once __DIR__ . '/../models/SecurityManager.php';
 
 class AuthController {
     private $usuarioModel;
@@ -12,16 +13,19 @@ class AuthController {
         // Cargar el modelo de usuario
         $this->usuarioModel = new Usuario();
         
+        // Configurar cookies de sesión seguras
+        SecurityManager::configureSessionCookies();
+        
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
     }
 
     /**
-     * Sanitiza y valida entrada del usuario
+     * Sanitiza y valida entrada del usuario usando SecurityManager
      */
-    private function sanitizeInput($input) {
-        return trim(htmlspecialchars(strip_tags($input), ENT_QUOTES, 'UTF-8'));
+    private function sanitizeInput($input, $type = 'text') {
+        return SecurityManager::sanitizeInput($input, $type);
     }
 
     /**
@@ -88,9 +92,16 @@ class AuthController {
 
     public function login() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Validar CSRF token
+            if (!SecurityManager::validateCSRFFromRequest()) {
+                $_SESSION['error'] = 'Token de seguridad inválido. Por favor, intenta de nuevo.';
+                header('Location: /finca_cafetera/public/login.php');
+                exit;
+            }
+
             // Sanitizar entrada
-            $username = $this->sanitizeInput($_POST['username'] ?? '');
-            $password = $_POST['password'] ?? ''; // NO sanitizar contraseña, solo trim
+            $username = $this->sanitizeInput($_POST['username'] ?? '', 'text');
+            $password = trim($_POST['password'] ?? ''); // Trim pero no sanitizar contraseña
 
             // Validar que no esté vacío
             if (empty($username) || empty($password)) {
@@ -134,6 +145,18 @@ class AuthController {
                     'rol' => $usuario['rol']
                 ];
                 
+                // Manejo de "Recuérdame"
+                if (isset($_POST['remember_me']) && $_POST['remember_me'] === 'on') {
+                    // Generar token único para remember me
+                    $rememberToken = bin2hex(random_bytes(32));
+                    
+                    // Guardar token en base de datos (si existe tabla de tokens)
+                    // $this->usuarioModel->saveRememberToken($usuario['id'], $rememberToken);
+                    
+                    // Crear cookie de remember me
+                    SecurityManager::setRememberMeCookie($usuario['id'], $rememberToken, 30);
+                }
+                
                 // Registrar login en log (opcional)
                 error_log("[LOGIN] Usuario {$username} inició sesión correctamente - " . date('Y-m-d H:i:s'));
                 
@@ -154,20 +177,52 @@ class AuthController {
     }
 
     public function logout() {
+        // Limpiar cookies de "Remember Me"
+        SecurityManager::deleteRememberMeCookie();
+        
         session_destroy();
         header('Location: /finca_cafetera/public/login.php');
         exit;
     }
 
     public function checkAuth() {
+        // Configurar cookies de sesión
+        SecurityManager::configureSessionCookies();
+        
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         
         if (!isset($_SESSION['usuario'])) {
+            // Intentar usar "Remember Me" cookie
+            $rememberData = SecurityManager::getRememberMeCookie();
+            
+            if ($rememberData) {
+                // Cargar usuario desde la cookie
+                $usuario = $this->usuarioModel->find($rememberData['user_id']);
+                
+                if ($usuario) {
+                    // Restaurar sesión del usuario
+                    $_SESSION['usuario'] = [
+                        'id' => intval($usuario['id']),
+                        'username' => $usuario['username'],
+                        'nombre_completo' => $usuario['nombre_completo'],
+                        'rol' => $usuario['rol']
+                    ];
+                    
+                    error_log("[AUTO_LOGIN] Usuario {$usuario['username']} restaurado desde Remember Me - " . date('Y-m-d H:i:s'));
+                    
+                    return $_SESSION['usuario'];
+                } else {
+                    // Cookie inválida, eliminarla
+                    SecurityManager::deleteRememberMeCookie();
+                }
+            }
+            
             header('Location: /finca_cafetera/public/login.php');
             exit;
         }
+        
         return $_SESSION['usuario'];
     }
 }

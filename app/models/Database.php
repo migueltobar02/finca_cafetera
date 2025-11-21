@@ -12,8 +12,10 @@ class Database {
         require_once __DIR__ . '/../config/database.php';
         
         try {
-            $dsn = "mysql:host=" . DatabaseConfig::HOST . ";dbname=" . DatabaseConfig::DATABASE . ";charset=" . DatabaseConfig::CHARSET;
-            $this->connection = new PDO($dsn, DatabaseConfig::USERNAME, DatabaseConfig::PASSWORD);
+            $config = DatabaseConfig::getConfig();
+            $port = !empty($config['port']) && $config['port'] != 3306 ? ";port=" . $config['port'] : "";
+            $dsn = "mysql:host=" . $config['host'] . $port . ";dbname=" . $config['database'] . ";charset=" . $config['charset'];
+            $this->connection = new PDO($dsn, $config['user'], $config['password']);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {

@@ -6,13 +6,13 @@
 // Cargar autoloader primero
 require_once '../app/autoload.php';
 
+// Inicializar seguridad
+SecurityManager::initSession();
+SecurityManager::setSecurityHeaders();
+
 $auth = new AuthController();
 
 // Si ya está autenticado, redirigir al dashboard
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 if (isset($_SESSION['usuario'])) {
     header('Location: dashboard.php');
     exit;
@@ -21,6 +21,9 @@ if (isset($_SESSION['usuario'])) {
 // Mostrar mensajes de error si existen
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
+
+// Generar token CSRF
+$csrf_token = SecurityManager::generateCSRFToken();
 
 // El resto del código HTML permanece igual...
 ?>
@@ -70,16 +73,26 @@ unset($_SESSION['error']);
                 <?php endif; ?>
 
                 <form method="POST" action="../app/controllers/AuthController.php?action=login">
+                    <!-- Token CSRF para prevenir CSRF attacks -->
+                    <input type="hidden" name="_csrf_token" value="<?= SecurityManager::escapeAttribute($csrf_token) ?>">
+                    
                     <div class="mb-3">
                         <label for="username" class="form-label">Usuario</label>
                         <input type="text" class="form-control" id="username" name="username" 
                                placeholder="Ingrese su usuario" required autofocus>
                     </div>
                     
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="password" class="form-label">Contraseña</label>
                         <input type="password" class="form-control" id="password" name="password" 
                                placeholder="Ingrese su contraseña" required>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">
+                            Recuérdame por 30 días
+                        </label>
                     </div>
                     
                     <button type="submit" class="btn w-100" 
