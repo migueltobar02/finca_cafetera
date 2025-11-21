@@ -1,20 +1,17 @@
 <?php
-/**
- * Punto de entrada principal del sistema
- * Redirige al dashboard si está autenticado, sino al login
- */
+// Habilitar errores para debug
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Cargar autoloader primero
+// Usar ruta absoluta
 require_once __DIR__ . '/../app/autoload.php';
 
-// Ahora cargar el controlador de autenticación
-$auth = new AuthController();
-
-// Verificar si ya está autenticado
+// Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Redirección
 if (isset($_SESSION['usuario'])) {
     header('Location: dashboard.php');
     exit;
