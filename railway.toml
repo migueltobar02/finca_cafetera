@@ -1,16 +1,6 @@
-
-
 [build]
-  builder = "dockerfile"
+builder = "dockerfile"
 
 [deploy]
-  # Aquí va el healthcheck real
-  # Tu app NO está en /public/
-  healthcheckPath = "/index.php"
-  restartPolicyType = "ON_FAILURE"
-
-[http_service]
-  internal_port = 80
-  force_https = true
-  auto_stop_machines = "off"
-  auto_start_machines = true
+healthcheckPath = "/index.php"
+restartPolicyType = "ON_FAILURE"
