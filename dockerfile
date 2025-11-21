@@ -1,18 +1,15 @@
-# Imagen con PHP 8.2 + Apache
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias para MySQL
-RUN docker-php-ext-install pdo pdo_mysql
-
-# Habilitar mod_rewrite
+# Activar mod_rewrite si usas .htaccess
 RUN a2enmod rewrite
 
-# Copiar el proyecto completo
-COPY . /var/www/html/
+# Copiar TODO lo que haya en public/ a Apache
+COPY public/ /var/www/html/
 
-# Establecer la carpeta public como raíz del servidor
-WORKDIR /var/www/html/public/
+# Permisos correctos
+RUN chown -R www-data:www-data /var/www/html
 
-# Permisos
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Instalar extensiones PHP necesarias (si quieres otra me dices)
+RUN docker-php-ext-install mysqli pdo pdo_mysql
+
+EXPOSE 80
