@@ -3,16 +3,28 @@
  * Página de inicio de sesión
  */
 
-// Cargar autoloader primero
-require_once '../app/autoload.php';
+// Habilitar errores para debug (opcional)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Inicializar seguridad
-SecurityManager::initSession();
-SecurityManager::setSecurityHeaders();
+// Iniciar sesión si no está activa
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
-$auth = new AuthController();
+// Incluir autoload correctamente desde app/
+require_once __DIR__ . '/app/autoload.php';
 
-// Si ya está autenticado, redirigir al dashboard
+// Inicializar seguridad (si existe tu clase SecurityManager)
+if (class_exists('SecurityManager')) {
+    SecurityManager::initSession();
+    SecurityManager::setSecurityHeaders();
+}
+
+// Instancia del controlador de autenticación
+$auth = class_exists('AuthController') ? new AuthController() : null;
+
+// Redirigir al dashboard si ya está autenticado
 if (isset($_SESSION['usuario'])) {
     header('Location: dashboard.php');
     exit;
@@ -22,10 +34,8 @@ if (isset($_SESSION['usuario'])) {
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
 
-// Generar token CSRF
-$csrf_token = SecurityManager::generateCSRFToken();
-
-// El resto del código HTML permanece igual...
+// Generar token CSRF (si existe la clase)
+$csrf_token = class_exists('SecurityManager') ? SecurityManager::generateCSRFToken() : '';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -72,9 +82,9 @@ $csrf_token = SecurityManager::generateCSRFToken();
                 </div>
                 <?php endif; ?>
 
-                <form method="POST" action="../app/controllers/AuthController.php?action=login">
-                    <!-- Token CSRF para prevenir CSRF attacks -->
-                    <input type="hidden" name="_csrf_token" value="<?= SecurityManager::escapeAttribute($csrf_token) ?>">
+                <form method="POST" action="app/controllers/AuthController.php?action=login">
+                    <!-- Token CSRF -->
+                    <input type="hidden" name="_csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
                     
                     <div class="mb-3">
                         <label for="username" class="form-label">Usuario</label>
@@ -112,10 +122,9 @@ $csrf_token = SecurityManager::generateCSRFToken();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Focus en el campo de usuario al cargar la página
         document.getElementById('username').focus();
-        
-        // Prevenir envío múltiple del formulario
+
+        // Prevenir envío múltiple
         document.querySelector('form').addEventListener('submit', function(e) {
             const btn = this.querySelector('button[type="submit"]');
             btn.disabled = true;

@@ -1,23 +1,21 @@
 <?php
-// Habilitar errores para debug (puedes desactivarlo en producción)
+// Habilitar errores para debug (opcional)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-
-// Usar ruta absoluta correcta dentro del contenedor
-require_once __DIR__ . '/app/autoload.php';
 
 // Iniciar sesión si no está activa
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Redirección a las páginas correctas dentro de 'public/'
-// Asegúrate que 'login.php' y 'dashboard.php' estén en la misma carpeta que index.php
+// Incluir autoload desde app
+require_once __DIR__ . '/app/autoload.php';
+
+// Redirigir según sesión
 if (isset($_SESSION['usuario'])) {
-    header('Location: dashboard.php'); // si dashboard.php está en public/
+    header('Location: dashboard.php');
     exit;
 } else {
-    header('Location: login.php'); // si login.php está en public/
+    header('Location: login.php');
     exit;
 }
-
