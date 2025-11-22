@@ -22,6 +22,7 @@ class Database {
             die("Error de conexión a la base de datos: " . $e->getMessage());
         }
     }
+    
 
     public static function getInstance() {
         if (self::$instance === null) {
