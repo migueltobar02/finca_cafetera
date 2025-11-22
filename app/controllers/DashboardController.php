@@ -6,6 +6,7 @@ require_once __DIR__ . '/../models/Venta.php';
 require_once __DIR__ . '/../models/Empleado.php';
 require_once __DIR__ . '/../models/Jornal.php';
 require_once __DIR__ . '/../models/Cliente.php';
+require_once __DIR__ . '/../models/Actividad.php';
 
 class DashboardController
 {
@@ -18,41 +19,41 @@ class DashboardController
 
     public function __construct()
     {
-        $this->ingreso = new Ingreso();
-        $this->egreso   = new Egreso();
-        $this->cosecha  = new Cosecha();
+        $this->ingreso   = new Ingreso();
+        $this->egreso    = new Egreso();
+        $this->cosecha   = new Cosecha();
         $this->actividad = new Actividad();
         $this->jornal    = new Jornal();
         $this->cliente   = new Cliente();
     }
 
     /* ---------------------------------------------------
-     *  ESTADÍSTICAS GENERALES
+     * ESTADÍSTICAS GENERALES
      * --------------------------------------------------- */
     public function getEstadisticas()
     {
         return [
-            "ingresos_mes"      => $this->ingreso->getIngresosMes(),
-            "egresos_mes"       => $this->egreso->getEgresosMes(),
-            "cosechas_mes"      => $this->cosecha->getCosechasMes(),
-            "top_clientes"      => $this->cliente->getTopClientes(),
-            "actividad_reciente" => $this->getActividadReciente(),
-            "proximas_cosechas"  => $this->getProximasCosechas(),
+            "ingresos_mes"        => $this->ingreso->getIngresosMes(),
+            "egresos_mes"         => $this->egreso->getEgresosMes(),
+            "cosechas_mes"        => $this->cosecha->getCosechasMes(),
+            "top_clientes"        => $this->cliente->getTopClientes(),
+            "actividad_reciente"  => $this->getActividadReciente(),
+            "proximas_cosechas"   => $this->getProximasCosechas(),
             "jornales_pendientes" => $this->getJornalesPendientes(),
         ];
     }
 
     /* ---------------------------------------------------
-     *  ACTIVIDAD RECIENTE
+     * ACTIVIDAD RECIENTE (PostgreSQL)
      * --------------------------------------------------- */
     public function getActividadReciente()
     {
-        $db = Database::getInstance(); // PDO directo
+        $db = Database::getInstance();
 
         $sql = "
-            SELECT descripcion, fecha
+            SELECT descripcion, fecha_creacion
             FROM actividades
-            ORDER BY fecha DESC
+            ORDER BY fecha_creacion DESC
             LIMIT 5
         ";
 
@@ -62,7 +63,7 @@ class DashboardController
     }
 
     /* ---------------------------------------------------
-     *  PRÓXIMAS COSECHAS
+     * PRÓXIMAS COSECHAS
      * --------------------------------------------------- */
     public function getProximasCosechas()
     {
@@ -82,7 +83,7 @@ class DashboardController
     }
 
     /* ---------------------------------------------------
-     *  JORNALES PENDIENTES
+     * JORNALES PENDIENTES
      * --------------------------------------------------- */
     public function getJornalesPendientes()
     {
