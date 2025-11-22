@@ -12,7 +12,10 @@ class Cliente extends Model {
      */
     public function getClientesFrecuentes() {
         $sql = "SELECT 
-                    c.*, 
+                    c.id,
+                    c.nombres,
+                    c.apellidos,
+                    c.razon_social,
                     COUNT(v.id) AS total_compras, 
                     SUM(v.total_venta) AS monto_total
                 FROM clientes c
@@ -25,7 +28,6 @@ class Cliente extends Model {
                 ORDER BY monto_total DESC NULLS LAST
                 LIMIT 10";
 
-        // PostgreSQL no tiene problemas con LIMIT fijo
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
 
@@ -47,25 +49,31 @@ class Cliente extends Model {
 
         return $stmt->fetchAll();
     }
+
+    /**
+     * Top clientes (más ventas en monto)
+     */
     public function getTopClientes($limit = 5)
-{
-    $db = Database::getInstance();
+    {
+        $sql = "
+            SELECT 
+                c.id, 
+                c.nombres AS nombre,
+                c.apellidos,
+                COALESCE(COUNT(v.id), 0) AS total_ventas,
+                COALESCE(SUM(v.total_venta), 0) AS total_monto
+            FROM clientes c
+            LEFT JOIN ventas v 
+                ON c.id = v.cliente_id
+            WHERE c.estado = 'activo'
+            GROUP BY c.id
+            ORDER BY total_monto DESC
+            LIMIT $1
+        ";
 
-    $sql = "
-        SELECT c.id, c.nombre, COUNT(v.id) AS total_ventas, SUM(v.monto_total) AS total_monto
-        FROM clientes c
-        LEFT JOIN ventas v ON c.id = v.cliente_id
-        GROUP BY c.id
-        ORDER BY total_monto DESC
-        LIMIT :limite
-    ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$limit]);
 
-    $stmt = $db->prepare($sql);
-    $stmt->bindValue(":limite", $limit, PDO::PARAM_INT);
-    $stmt->execute();
-
-    return $stmt->fetchAll();
+        return $stmt->fetchAll();
+    }
 }
-
-}
-?>
