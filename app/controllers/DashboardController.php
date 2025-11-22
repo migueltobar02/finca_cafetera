@@ -27,6 +27,9 @@ class DashboardController
         $this->cliente   = new Cliente();
     }
 
+    /* ---------------------------------------------------
+     * ESTADÍSTICAS GENERALES
+     * --------------------------------------------------- */
     public function getEstadisticas()
     {
         return [
@@ -40,9 +43,9 @@ class DashboardController
         ];
     }
 
-    /* ============================
-     * ACTIVIDAD RECIENTE
-     * ============================ */
+    /* ---------------------------------------------------
+     * ACTIVIDAD RECIENTE (PostgreSQL)
+     * --------------------------------------------------- */
     public function getActividadReciente()
     {
         $db = Database::getInstance();
@@ -59,18 +62,19 @@ class DashboardController
         return $stmt->fetchAll();
     }
 
-    /* ============================
+    /* ---------------------------------------------------
      * PRÓXIMAS COSECHAS
-     * ============================ */
+     * (Tu tabla SOLO tiene fecha_cosecha → NO existe fecha_estimada)
+     * --------------------------------------------------- */
     public function getProximasCosechas()
     {
         $db = Database::getInstance();
 
         $sql = "
-            SELECT lote_id, fecha_estimada_cosecha
+            SELECT lote_id, fecha_cosecha
             FROM cosechas
-            WHERE fecha_estimada_cosecha > CURRENT_DATE
-            ORDER BY fecha_estimada_cosecha ASC
+            WHERE fecha_cosecha > CURRENT_DATE
+            ORDER BY fecha_cosecha ASC
             LIMIT 5
         ";
 
@@ -79,9 +83,10 @@ class DashboardController
         return $stmt->fetchAll();
     }
 
-    /* ============================
+    /* ---------------------------------------------------
      * JORNALES PENDIENTES
-     * ============================ */
+     * (EN TU TABLA la columna es actividad_id → no 'actividad')
+     * --------------------------------------------------- */
     public function getJornalesPendientes()
     {
         $db = Database::getInstance();
