@@ -20,3 +20,4 @@ if (isset($_SESSION['usuario'])) {
     header('Location: login.php'); // si login.php está en public/
     exit;
 }
+
