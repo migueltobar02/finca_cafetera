@@ -13,40 +13,40 @@ class Model {
         if (!class_exists('Database')) {
             require_once __DIR__ . '/Database.php';
         }
-        $this->db = Database::getInstance()->getConnection();
+
+        // Usar PDO directamente
+        $this->db = Database::getInstance();
         $this->table = $table;
         $this->softDelete = $softDelete;
     }
 
     public function getAll() {
-        if ($this->softDelete) {
-            $sql = "SELECT * FROM {$this->table} WHERE estado = 'activo'";
-        } else {
-            $sql = "SELECT * FROM {$this->table}";
-        }
+        $sql = $this->softDelete
+            ? "SELECT * FROM {$this->table} WHERE estado = 'activo'"
+            : "SELECT * FROM {$this->table}";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function find($id) {
-        if ($this->softDelete) {
-            $sql = "SELECT * FROM {$this->table} WHERE id = ? AND estado = 'activo'";
-        } else {
-            $sql = "SELECT * FROM {$this->table} WHERE id = ?";
-        }
+        $sql = $this->softDelete
+            ? "SELECT * FROM {$this->table} WHERE id = ? AND estado = 'activo'"
+            : "SELECT * FROM {$this->table} WHERE id = ?";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function create($data) {
         $columns = implode(', ', array_keys($data));
         $placeholders = ':' . implode(', :', array_keys($data));
-        
+
         $sql = "INSERT INTO {$this->table} ($columns) VALUES ($placeholders)";
         $stmt = $this->db->prepare($sql);
-        
+
         return $stmt->execute($data);
     }
 
@@ -56,10 +56,10 @@ class Model {
             $setClause[] = "$key = :$key";
         }
         $setClause = implode(', ', $setClause);
-        
+
         $sql = "UPDATE {$this->table} SET $setClause WHERE id = :id";
         $data['id'] = $id;
-        
+
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($data);
     }
@@ -74,27 +74,23 @@ class Model {
     }
 
     public function count() {
-        if ($this->softDelete) {
-            $sql = "SELECT COUNT(*) as total FROM {$this->table} WHERE estado = 'activo'";
-        } else {
-            $sql = "SELECT COUNT(*) as total FROM {$this->table}";
-        }
+        $sql = $this->softDelete
+            ? "SELECT COUNT(*) as total FROM {$this->table} WHERE estado = 'activo'"
+            : "SELECT COUNT(*) as total FROM {$this->table}";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetch()['total'];
+        return $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     }
 
-    // Método para consultas personalizadas
     public function query($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // Método para ejecutar consultas sin retorno
     public function execute($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute($params);
     }
 }
-?>
