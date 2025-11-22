@@ -27,9 +27,6 @@ class DashboardController
         $this->cliente   = new Cliente();
     }
 
-    /* ---------------------------------------------------
-     * ESTADÍSTICAS GENERALES
-     * --------------------------------------------------- */
     public function getEstadisticas()
     {
         return [
@@ -43,9 +40,9 @@ class DashboardController
         ];
     }
 
-    /* ---------------------------------------------------
-     * ACTIVIDAD RECIENTE (PostgreSQL)
-     * --------------------------------------------------- */
+    /* ============================
+     * ACTIVIDAD RECIENTE
+     * ============================ */
     public function getActividadReciente()
     {
         $db = Database::getInstance();
@@ -62,18 +59,18 @@ class DashboardController
         return $stmt->fetchAll();
     }
 
-    /* ---------------------------------------------------
+    /* ============================
      * PRÓXIMAS COSECHAS
-     * --------------------------------------------------- */
+     * ============================ */
     public function getProximasCosechas()
     {
         $db = Database::getInstance();
 
         $sql = "
-            SELECT lote_id, fecha_cosecha_estimada 
+            SELECT lote_id, fecha_estimada_cosecha
             FROM cosechas
-            WHERE fecha_cosecha_estimada > CURRENT_DATE
-            ORDER BY fecha_cosecha_estimada ASC
+            WHERE fecha_estimada_cosecha > CURRENT_DATE
+            ORDER BY fecha_estimada_cosecha ASC
             LIMIT 5
         ";
 
@@ -82,15 +79,15 @@ class DashboardController
         return $stmt->fetchAll();
     }
 
-    /* ---------------------------------------------------
+    /* ============================
      * JORNALES PENDIENTES
-     * --------------------------------------------------- */
+     * ============================ */
     public function getJornalesPendientes()
     {
         $db = Database::getInstance();
 
         $sql = "
-            SELECT empleado_id, fecha, horas, actividad
+            SELECT empleado_id, fecha, horas, actividad_id
             FROM jornales
             WHERE pagado = false
             ORDER BY fecha DESC
