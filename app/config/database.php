@@ -5,21 +5,15 @@ require_once dirname(__DIR__) . '/helpers/EnvLoader.php';
 EnvLoader::load();
 
 class DatabaseConfig {
-    const HOST = 'PGHOST';  // ajusta si quieres usar constante
-    const PORT = 'PGPORT' ?? 5432;
-    const USERNAME = 'PGUSER';
-    const PASSWORD = 'PGPASSWORD';
-    const DATABASE = 'PGDATABASE';
-    const CHARSET = 'UTF8'; // PostgreSQL no usa utf8mb4
 
     public static function getConfig() {
         return [
-            'host' => EnvLoader::get('PGHOST', 'localhost'),
-            'port' => EnvLoader::get('PGPORT', 5432),
-            'user' => EnvLoader::get('PGUSER', 'postgres'),
-            'password' => EnvLoader::get('PGPASSWORD', ''),
-            'database' => EnvLoader::get('PGDATABASE', 'finca_cafetera'),
-            'charset' => 'UTF8'
+            'host' => EnvLoader::get('MYSQLHOST', 'localhost'),   // tu host de Postgres
+            'port' => EnvLoader::get('MYSQLPORT', 5432),          // puerto de Postgres
+            'user' => EnvLoader::get('MYSQLUSER', 'postgres'),    // usuario de Postgres
+            'password' => EnvLoader::get('MYSQLPASSWORD', ''),    // contraseña
+            'database' => EnvLoader::get('MYSQLDATABASE', 'finca_cafetera'), // nombre BD
+            'charset' => 'UTF8' // PostgreSQL no usa utf8mb4
         ];
     }
 }

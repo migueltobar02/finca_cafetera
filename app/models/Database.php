@@ -9,7 +9,7 @@ class Database {
         $config = DatabaseConfig::getConfig();
 
         // DSN para PostgreSQL
-        $dsn = "pgsql:host={$config['host']};port={$config['port']};dbname={$config['database']};options='--client_encoding={$config['charset']}'";
+        $dsn = "pgsql:host={$config['host']};port={$config['port']};dbname={$config['database']}";
 
         try {
             $this->pdo = new PDO(
@@ -22,7 +22,6 @@ class Database {
             die("Error de conexión a la base de datos: " . $e->getMessage());
         }
     }
-    
 
     public static function getInstance() {
         if (self::$instance === null) {
