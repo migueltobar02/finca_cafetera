@@ -47,5 +47,25 @@ class Cliente extends Model {
 
         return $stmt->fetchAll();
     }
+    public function getTopClientes($limit = 5)
+{
+    $db = Database::getInstance();
+
+    $sql = "
+        SELECT c.id, c.nombre, COUNT(v.id) AS total_ventas, SUM(v.monto_total) AS total_monto
+        FROM clientes c
+        LEFT JOIN ventas v ON c.id = v.cliente_id
+        GROUP BY c.id
+        ORDER BY total_monto DESC
+        LIMIT :limite
+    ";
+
+    $stmt = $db->prepare($sql);
+    $stmt->bindValue(":limite", $limit, PDO::PARAM_INT);
+    $stmt->execute();
+
+    return $stmt->fetchAll();
+}
+
 }
 ?>
