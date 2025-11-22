@@ -6,9 +6,12 @@
 // Cargar autoloader primero
 require_once __DIR__ . '/app/autoload.php';
 
-$auth = new AuthController();
-$usuario = $auth->checkAuth();
 
+
+$auth = new AuthController();
+$usuario = $auth->checkAuth(); // Redirige automáticamente al login si no hay sesión
+
+// Controlador de dashboard
 $dashboardController = new DashboardController();
 $estadisticas = $dashboardController->getEstadisticas();
 $actividadReciente = $dashboardController->getActividadReciente();
