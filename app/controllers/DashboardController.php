@@ -36,11 +36,20 @@ class DashboardController
             "ingresos_mes"        => $this->ingreso->getIngresosMes(),
             "egresos_mes"         => $this->egreso->getEgresosMes(),
             "cosechas_mes"        => $this->cosecha->getCosechasMes(),
-            "top_clientes"        => $this->cliente->getTopClientes(),
+            "top_clientes"        => $this->getTopClientes(), // ahora llama a la función interna
             "actividad_reciente"  => $this->getActividadReciente(),
             "proximas_cosechas"   => $this->getProximasCosechas(),
             "jornales_pendientes" => $this->getJornalesPendientes(),
         ];
+    }
+
+    /* ---------------------------------------------------
+     * TOP CLIENTES
+     * --------------------------------------------------- */
+    public function getTopClientes($limit = 5)
+    {
+        // Llama al método del modelo Cliente
+        return $this->cliente->getTopClientes($limit);
     }
 
     /* ---------------------------------------------------
