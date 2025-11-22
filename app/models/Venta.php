@@ -7,13 +7,14 @@ class Venta extends Model {
     }
 
     public function getVentasMes() {
-        $sql = "SELECT SUM(kilos_vendidos) as total_kilos, 
-                       SUM(total_venta) as total_ventas
-                FROM {$this->table} 
-                WHERE MONTH(fecha_venta) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha_venta) = YEAR(CURRENT_DATE())
+        $sql = "SELECT 
+                    SUM(kilos_vendidos) AS total_kilos, 
+                    SUM(total_venta) AS total_ventas
+                FROM {$this->table}
+                WHERE EXTRACT(MONTH FROM fecha_venta) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM fecha_venta) = EXTRACT(YEAR FROM CURRENT_DATE)
                 AND estado = 'pagada'";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetch();
@@ -21,31 +22,34 @@ class Venta extends Model {
 
     public function getWithCliente() {
         $sql = "SELECT v.*, 
-                       c.nombres as cliente_nombres, 
-                       c.apellidos as cliente_apellidos,
-                       c.razon_social as cliente_razon_social
+                       c.nombres AS cliente_nombres, 
+                       c.apellidos AS cliente_apellidos,
+                       c.razon_social AS cliente_razon_social
                 FROM {$this->table} v
                 JOIN clientes c ON v.cliente_id = c.id
                 ORDER BY v.fecha_venta DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    // CORREGIDO: LIMIT con parámetro correcto
+    // Top clientes con LIMIT seguro para PostgreSQL
     public function getTopClientes($limit = 5) {
-        $sql = "SELECT c.id, c.nombres, c.apellidos, c.razon_social,
-                       COUNT(v.id) as total_compras,
-                       SUM(v.total_venta) as total_compras_monto,
-                       SUM(v.kilos_vendidos) as total_kilos
+        $limit = (int)$limit; // sanitizar
+
+        $sql = "SELECT 
+                    c.id, c.nombres, c.apellidos, c.razon_social,
+                    COUNT(v.id) AS total_compras,
+                    SUM(v.total_venta) AS total_compras_monto,
+                    SUM(v.kilos_vendidos) AS total_kilos
                 FROM ventas v
                 JOIN clientes c ON v.cliente_id = c.id
                 WHERE v.estado = 'pagada'
                 GROUP BY c.id
                 ORDER BY total_compras_monto DESC
-                LIMIT " . (int)$limit;
-        
+                LIMIT $limit";
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -54,14 +58,15 @@ class Venta extends Model {
     public function getDistribucionVentas() {
         $sql = "SELECT 
                     calidad,
-                    SUM(kilos_vendidos) as total_kilos,
-                    SUM(total_venta) as total_ventas,
-                    COUNT(*) as cantidad_ventas
+                    SUM(kilos_vendidos) AS total_kilos,
+                    SUM(total_venta) AS total_ventas,
+                    COUNT(*) AS cantidad_ventas
                 FROM ventas
-                WHERE MONTH(fecha_venta) = MONTH(CURRENT_DATE())
+                WHERE EXTRACT(MONTH FROM fecha_venta) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM fecha_venta) = EXTRACT(YEAR FROM CURRENT_DATE)
                 AND estado = 'pagada'
                 GROUP BY calidad";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();

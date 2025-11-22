@@ -10,27 +10,27 @@ class Jornal extends Model {
         if (!$mes) $mes = date('m');
         if (!$ano) $ano = date('Y');
 
-        $sql = "SELECT j.*, a.nombre as actividad_nombre, e.nombres, e.apellidos
+        $sql = "SELECT j.*, a.nombre AS actividad_nombre, e.nombres, e.apellidos
                 FROM {$this->table} j
                 JOIN actividades a ON j.actividad_id = a.id
                 JOIN empleados e ON j.empleado_id = e.id
-                WHERE j.empleado_id = ? 
-                AND MONTH(j.fecha_jornal) = ? 
-                AND YEAR(j.fecha_jornal) = ?
+                WHERE j.empleado_id = ?
+                AND EXTRACT(MONTH FROM j.fecha_jornal) = ?
+                AND EXTRACT(YEAR FROM j.fecha_jornal) = ?
                 ORDER BY j.fecha_jornal DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$empleadoId, $mes, $ano]);
         return $stmt->fetchAll();
     }
 
     public function getTotalPagosMes() {
-        $sql = "SELECT SUM(total_pago) as total 
-                FROM {$this->table} 
-                WHERE MONTH(fecha_jornal) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha_jornal) = YEAR(CURRENT_DATE())
+        $sql = "SELECT SUM(total_pago) AS total
+                FROM {$this->table}
+                WHERE EXTRACT(MONTH FROM fecha_jornal) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM fecha_jornal) = EXTRACT(YEAR FROM CURRENT_DATE)
                 AND estado = 'pagado'";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetch();
@@ -39,12 +39,12 @@ class Jornal extends Model {
 
     // Sobrescribir getAll
     public function getAll() {
-        $sql = "SELECT j.*, a.nombre as actividad_nombre, e.nombres, e.apellidos
+        $sql = "SELECT j.*, a.nombre AS actividad_nombre, e.nombres, e.apellidos
                 FROM {$this->table} j
                 JOIN actividades a ON j.actividad_id = a.id
                 JOIN empleados e ON j.empleado_id = e.id
                 ORDER BY j.fecha_jornal DESC";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();

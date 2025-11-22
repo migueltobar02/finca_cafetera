@@ -7,13 +7,13 @@ class Empleado extends Model {
     }
 
     public function getWithJornales($empleadoId) {
-        $sql = "SELECT e.*, 
-                       SUM(j.horas_trabajadas) as total_horas_mes,
-                       SUM(j.total_pago) as total_pagado_mes
+        $sql = "SELECT e.*,
+                       SUM(j.horas_trabajadas) AS total_horas_mes,
+                       SUM(j.total_pago) AS total_pagado_mes
                 FROM empleados e
-                LEFT JOIN jornales j ON e.id = j.empleado_id 
-                    AND MONTH(j.fecha_jornal) = MONTH(CURRENT_DATE())
-                    AND YEAR(j.fecha_jornal) = YEAR(CURRENT_DATE())
+                LEFT JOIN jornales j ON e.id = j.empleado_id
+                    AND EXTRACT(MONTH FROM j.fecha_jornal) = EXTRACT(MONTH FROM CURRENT_DATE)
+                    AND EXTRACT(YEAR FROM j.fecha_jornal) = EXTRACT(YEAR FROM CURRENT_DATE)
                 WHERE e.id = ?
                 GROUP BY e.id";
         

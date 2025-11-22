@@ -7,10 +7,10 @@ class Egreso extends Model {
     }
 
     public function getEgresosMes() {
-        $sql = "SELECT SUM(monto) as total 
-                FROM {$this->table} 
-                WHERE MONTH(fecha_egreso) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha_egreso) = YEAR(CURRENT_DATE())";
+        $sql = "SELECT SUM(monto) AS total
+                FROM {$this->table}
+                WHERE EXTRACT(MONTH FROM fecha_egreso) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM fecha_egreso) = EXTRACT(YEAR FROM CURRENT_DATE)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -19,7 +19,7 @@ class Egreso extends Model {
     }
 
     public function getByTipo($tipo) {
-        $sql = "SELECT e.*, p.razon_social as proveedor_nombre
+        $sql = "SELECT e.*, p.razon_social AS proveedor_nombre
                 FROM {$this->table} e
                 LEFT JOIN proveedores p ON e.proveedor_id = p.id
                 WHERE e.tipo = ?
@@ -32,7 +32,7 @@ class Egreso extends Model {
 
     // Sobrescribir getAll para no usar estado
     public function getAll() {
-        $sql = "SELECT e.*, p.razon_social as proveedor_nombre
+        $sql = "SELECT e.*, p.razon_social AS proveedor_nombre
                 FROM {$this->table} e
                 LEFT JOIN proveedores p ON e.proveedor_id = p.id
                 ORDER BY e.fecha_egreso DESC";
