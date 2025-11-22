@@ -1,6 +1,14 @@
 # Imagen base PHP con Apache
 FROM php:8.2-apache
 
+# Instalar extensiones necesarias (PDO + MySQL)
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip unzip git curl \
+    && docker-php-ext-install pdo pdo_mysql mysqli
+
 # Copiamos la carpeta 'public' al directorio de Apache
 COPY public/ /var/www/html/
 
