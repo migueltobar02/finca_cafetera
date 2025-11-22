@@ -44,14 +44,14 @@ class DashboardController
     }
 
     /* ---------------------------------------------------
-     * ACTIVIDAD RECIENTE (PostgreSQL)
+     * ACTIVIDAD RECIENTE
      * --------------------------------------------------- */
     public function getActividadReciente()
     {
         $db = Database::getInstance();
 
         $sql = "
-            SELECT descripcion, fecha_creacion
+            SELECT nombre, descripcion, fecha_creacion
             FROM actividades
             ORDER BY fecha_creacion DESC
             LIMIT 5
@@ -59,12 +59,11 @@ class DashboardController
 
         $stmt = $db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* ---------------------------------------------------
      * PRÓXIMAS COSECHAS
-     * (Tu tabla SOLO tiene fecha_cosecha → NO existe fecha_estimada)
      * --------------------------------------------------- */
     public function getProximasCosechas()
     {
@@ -80,28 +79,27 @@ class DashboardController
 
         $stmt = $db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /* ---------------------------------------------------
      * JORNALES PENDIENTES
-     * (EN TU TABLA la columna es actividad_id → no 'actividad')
      * --------------------------------------------------- */
     public function getJornalesPendientes()
     {
         $db = Database::getInstance();
 
         $sql = "
-            SELECT empleado_id, fecha, horas, actividad_id
+            SELECT empleado_id, fecha_jornal AS fecha, horas_trabajadas AS horas, actividad_id, estado
             FROM jornales
-            WHERE pagado = false
-            ORDER BY fecha DESC
+            WHERE estado = 'pendiente'
+            ORDER BY fecha_jornal DESC
             LIMIT 5
         ";
 
         $stmt = $db->prepare($sql);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 ?>
