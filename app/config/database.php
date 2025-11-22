@@ -1,34 +1,25 @@
 <?php
-/**
- * Conexión sencilla a MySQL en Railway
- */
+require_once dirname(__DIR__) . '/helpers/EnvLoader.php';
 
-function conectarDB() {
-    // Obtener variables de entorno de Railway
-    $host = getenv('MYSQLHOST');
-    $port = getenv('MYSQLPORT') ?: 3306;
-    $db   = getenv('MYSQLDATABASE');
-    $user = getenv('MYSQLUSER');
-    $pass = getenv('MYSQLPASSWORD');
-    
-    try {
-        // Crear conexión PDO
-        $pdo = new PDO(
-            "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4",
-            $user,
-            $pass,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]
-        );
-        
-        return $pdo;
-        
-    } catch (PDOException $e) {
-        die("Error de conexión: " . $e->getMessage());
+// Cargar variables de entorno
+EnvLoader::load();
+
+class DatabaseConfig {
+    const HOST = MYSQLHOST;
+    const PORT = MYSQLPORT ?? 3306;
+    const USERNAME = MYSQLUSER;
+    const PASSWORD = MYSQLPASSWORD;
+    const DATABASE = MYSQLDATABASE;
+    const CHARSET = 'utf8mb4';
+
+    public static function getConfig() {
+        return [
+            'host' => EnvLoader::get('MYSQLHOST', 'localhost'),
+            'port' => EnvLoader::get('MYSQLPORT', 3306),
+            'user' => EnvLoader::get('MYSQLUSER', 'root'),
+            'password' => EnvLoader::get('MYSQLPASSWORD', ''),
+            'database' => EnvLoader::get('MYSQLDATABASE', 'finca_cafetera'),
+            'charset' => 'utf8mb4'
+        ];
     }
 }
-
-// Uso:
-// $pdo = conectarDB();
