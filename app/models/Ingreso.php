@@ -1,16 +1,19 @@
 <?php
 require_once 'Model.php';
 
+require_once 'Model.php';
+
 class Ingreso extends Model {
     public function __construct() {
         parent::__construct('ingresos', false); // false = no usa borrado suave
     }
 
     public function getIngresosMes() {
+        // PostgreSQL NO usa MONTH() ni YEAR(), sino EXTRACT()
         $sql = "SELECT SUM(monto) as total 
-                FROM {$this->table} 
-                WHERE MONTH(fecha_ingreso) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha_ingreso) = YEAR(CURRENT_DATE())";
+                FROM {$this->table}
+                WHERE EXTRACT(MONTH FROM fecha_ingreso) = EXTRACT(MONTH FROM CURRENT_DATE)
+                AND EXTRACT(YEAR FROM fecha_ingreso) = EXTRACT(YEAR FROM CURRENT_DATE)";
         
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -44,4 +47,5 @@ class Ingreso extends Model {
         return $stmt->fetchAll();
     }
 }
+
 ?>
