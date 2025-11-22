@@ -1,13 +1,14 @@
 # Imagen base PHP con Apache
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias (PDO + MySQL)
+# Instalar extensiones necesarias (PDO + PostgreSQL)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libpq-dev \
     zip unzip git curl \
-    && docker-php-ext-install pdo pdo_mysql mysqli
+    && docker-php-ext-install pdo pdo_pgsql pgsql
 
 # Copiamos la carpeta 'public' al directorio de Apache
 COPY public/ /var/www/html/
@@ -29,4 +30,3 @@ EXPOSE 80
 
 # Comando por defecto para iniciar Apache
 CMD ["apache2-foreground"]
-
