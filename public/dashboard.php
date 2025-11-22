@@ -4,7 +4,7 @@
  */
 
 // Cargar autoloader primero
-require_once '../app/autoload.php';
+require_once __DIR__ . '/app/autoload.php';
 
 $auth = new AuthController();
 $usuario = $auth->checkAuth();
