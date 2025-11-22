@@ -1,27 +1,23 @@
-# Usa PHP con Apache
+# Imagen base PHP con Apache
 FROM php:8.2-apache
 
-# Habilitar extensiones necesarias
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# Copiamos la carpeta 'public' al directorio de Apache
+COPY public/ /var/www/html/
 
-# Habilitar mod_rewrite (importante para frameworks y rutas limpias)
+# Copiamos la carpeta 'app' para que los includes funcionen
+COPY app/ /var/www/html/app/
+
+# Copiamos la carpeta 'database' si es necesaria (opcional)
+COPY database/ /var/www/html/database/
+
+# Ajustamos permisos
+RUN chown -R www-data:www-data /var/www/html/
+
+# Habilitamos mod_rewrite si lo necesitas
 RUN a2enmod rewrite
 
-# Configurar Apache para que el DocumentRoot sea /var/www/html/public
-RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
+# Exponemos el puerto 80
+EXPOSE 80
 
-# Permitir .htaccess dentro de /public
-RUN printf "<Directory /var/www/html/public>\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>\n" >> /etc/apache2/apache2.conf
-
-# Copiar tu proyecto
-COPY . /var/www/html/
-
-# Dar permisos correctos a Apache
-RUN chown -R www-data:www-data /var/www/html
-
-# Healthcheck interno para Railway
-HEALTHCHECK --interval=10s --timeout=3s --retries=10 \
-  CMD curl -f http://localhost/ || exit 1
+# Comando por defecto para iniciar Apache
+CMD ["apache2-foreground"]
