@@ -7,16 +7,18 @@ class Cosecha extends Model {
     }
 
     public function getCosechasMes() {
-        $sql = "SELECT SUM(kilos_cosechados) as total 
-                FROM {$this->table} 
-                WHERE MONTH(fecha_cosecha) = MONTH(CURRENT_DATE()) 
-                AND YEAR(fecha_cosecha) = YEAR(CURRENT_DATE())";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->fetch();
-        return $result['total'] ?? 0;
-    }
+    $sql = "SELECT 
+                SUM(kilos_cosechados) AS total_cosechado,
+                AVG(rendimiento) AS rendimiento_promedio
+            FROM {$this->table}
+            WHERE EXTRACT(MONTH FROM fecha_cosecha) = EXTRACT(MONTH FROM CURRENT_DATE)
+              AND EXTRACT(YEAR FROM fecha_cosecha) = EXTRACT(YEAR FROM CURRENT_DATE)";
+
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetch();
+}
+
 
     public function getWithLote() {
         $sql = "SELECT c.*, l.nombre as lote_nombre, l.codigo_lote
