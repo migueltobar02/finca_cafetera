@@ -36,18 +36,25 @@ class ClientesController {
 
     public function actualizar($id, $data) {
 
-    if (is_array($data['numero_identificacion'])) {
-        $data['numero_identificacion'] = $data['numero_identificacion'][0];
-    }
-
     if (empty($data['numero_identificacion'])) {
         throw new Exception("El número de identificación es obligatorio.");
     }
 
     $data['numero_identificacion'] = trim($data['numero_identificacion']);
 
+    // Validación: verificar si el número de identificación ya existe en otro cliente
+    $db = Database::getInstance()->getConnection();
+    $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([$data['numero_identificacion'], $id]);
+
+    if ($stmt->fetch()) {
+        throw new Exception("El número de identificación ya está registrado por otro cliente.");
+    }
+
     return $this->clienteModel->update($id, $data);
 }
+
 
 
     public function eliminar($id) {
