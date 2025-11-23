@@ -16,10 +16,26 @@ class ClientesController {
     }
 
     public function crear($data) {
+
+        // Validación: numero_identificacion es obligatorio
+        if (empty($data['numero_identificacion'])) {
+            throw new Exception("El número de identificación es obligatorio.");
+        }
+
+        // Validación para evitar valores vacíos que violen el UNIQUE
+        $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
         return $this->clienteModel->create($data);
     }
 
     public function actualizar($id, $data) {
+
+        if (empty($data['numero_identificacion'])) {
+            throw new Exception("El número de identificación es obligatorio.");
+        }
+
+        $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
         return $this->clienteModel->update($id, $data);
     }
 
