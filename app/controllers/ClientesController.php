@@ -36,27 +36,39 @@ class ClientesController {
 
     public function actualizar($id, $data) {
 
-        if (empty($data['numero_identificacion'])) {
-            throw new Exception("El número de identificación es obligatorio.");
-        }
+    // Normalizar dato
+    $numId = $data['numero_identificacion'] ?? '';
 
-        $data['numero_identificacion'] = trim($data['numero_identificacion']);
-
-        // Aquí corregimos el error del getConnection()
-        $db = Database::getInstance();  // ya es un PDO
-
-        // Validación: verificar si el número de identificación ya existe en otro cliente
-        // *** ESTA ES LA LÍNEA CORRECTA ***
-        $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([$data['numero_identificacion'], $id]);
-
-        if ($stmt->fetch()) {
-            throw new Exception("El número de identificación ya está registrado por otro cliente.");
-        }
-
-        return $this->clienteModel->update($id, $data);
+    if (is_array($numId)) {
+        $numId = $numId[0];
     }
+
+    if (empty($numId)) {
+        $_SESSION['error'] = "El número de identificación es obligatorio.";
+        return false;
+    }
+
+    $numId = trim($numId);
+    $data['numero_identificacion'] = $numId;
+
+    // Conexión
+    $db = Database::getInstance(); // PDO
+
+    // Verificar si el número está usado por OTRO cliente
+    $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([$numId, $id]);
+
+    if ($stmt->fetch()) {
+        // EN VEZ DE EXCEPCIÓN → usar mensaje de $_SESSION
+        $_SESSION['error'] = "La cédula ya está registrada por otro cliente.";
+        return false;
+    }
+
+    // Si no existe duplicado → actualizar
+    return $this->clienteModel->update($id, $data);
+}
+
 
 
     public function eliminar($id) {
