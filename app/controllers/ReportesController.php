@@ -44,24 +44,22 @@ class ReportesController {
     }
 
     public function getComparativoMensual($meses = 6) {
-        // CORREGIDO: LIMIT con concatenación
         $sql = "SELECT 
-                    YEAR(fecha_ingreso) as ano,
-                    MONTH(fecha_ingreso) as mes,
+                    EXTRACT(YEAR FROM fecha_ingreso) as ano,
+                    EXTRACT(MONTH FROM fecha_ingreso) as mes,
                     COALESCE(SUM(monto), 0) as ingresos
                 FROM ingresos
-                WHERE fecha_ingreso >= DATE_SUB(CURRENT_DATE, INTERVAL " . (int)$meses . " MONTH)
-                GROUP BY YEAR(fecha_ingreso), MONTH(fecha_ingreso)
+                WHERE fecha_ingreso >= CURRENT_DATE - INTERVAL '" . (int)$meses . " months'
+                GROUP BY EXTRACT(YEAR FROM fecha_ingreso), EXTRACT(MONTH FROM fecha_ingreso)
                 ORDER BY ano DESC, mes DESC
                 LIMIT " . (int)$meses;
         
-       $db = Database::getInstance();
+        $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    // Método alternativo más simple (ya corregido)
     public function getComparativoSimple($meses = 6) {
         $resultados = [];
         
@@ -71,7 +69,6 @@ class ReportesController {
             $mes = date('m', strtotime("-$i months"));
             $mesNombre = $this->getNombreMes($mes);
             
-            // Obtener ingresos del mes
             $ingresos = $this->getIngresosPorMes($ano, $mes);
             $egresos = $this->getEgresosPorMes($ano, $mes);
             $utilidad = $ingresos - $egresos;
@@ -101,11 +98,10 @@ class ReportesController {
     }
 
     private function getIngresosPorMes($ano, $mes) {
-
-        $sql = "SELECT COALESCE(SUM(monto), 0) as total 
-                FROM ingresos 
-                WHERE YEAR(fecha_ingreso) = ? 
-                AND MONTH(fecha_ingreso) = ?";
+        $sql = "SELECT COALESCE(SUM(monto), 0) as total
+                FROM ingresos
+                WHERE EXTRACT(YEAR FROM fecha_ingreso) = ?
+                  AND EXTRACT(MONTH FROM fecha_ingreso) = ?";
         
         $db = Database::getInstance();
         $stmt = $db->prepare($sql);
@@ -115,16 +111,16 @@ class ReportesController {
     }
 
     private function getEgresosPorMes($ano, $mes) {
-        $sql = "SELECT COALESCE(SUM(monto), 0) as total 
-                FROM egresos 
-                WHERE YEAR(fecha_egreso) = ? 
-                AND MONTH(fecha_egreso) = ?";
+        $sql = "SELECT COALESCE(SUM(monto), 0) as total
+                FROM egresos
+                WHERE EXTRACT(YEAR FROM fecha_egreso) = ?
+                  AND EXTRACT(MONTH FROM fecha_egreso) = ?";
         
         $db = Database::getInstance();
         $stmt = $db->prepare($sql);
-        $stmt->execute([$ano, $mes]); // pasas año y mes, no $termino
-        $result = $stmt->fetch(PDO::FETCH_ASSOC); // un solo registro
-        return $result['total'] ?? 0; // devuelve el total correctamente
+        $stmt->execute([$ano, $mes]);
+        $result = $stmt->fetch();
+        return $result['total'] ?? 0;
     }
 }
 ?>
