@@ -81,7 +81,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
 
                         <form method="POST" action="cliente_form.php<?= isset($_GET['id']) ? '?id=' . $_GET['id'] : '' ?>">
-                            <?php include '../app/views/clientes/form.php'; ?>
+                            <?php include(__DIR__ . '/app/views/clientes/form.php');
+?>
                             
                             <div class="row mt-4">
                                 <div class="col-12">

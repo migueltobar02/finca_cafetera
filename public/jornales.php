@@ -1,6 +1,8 @@
 <?php
+session_start();
 require_once __DIR__ . '/app/controllers/AuthController.php';
 require_once __DIR__ . '/app/controllers/JornalesController.php';
+require_once __DIR__ . '/app/controllers/CosechasController.php';
 
 $auth = new AuthController();
 $usuario = $auth->checkAuth();
@@ -9,6 +11,10 @@ $jornalesController = new JornalesController();
 $jornales = $jornalesController->index();
 $empleados = $jornalesController->obtenerEmpleados();
 $actividades = $jornalesController->obtenerActividades();
+
+// Obtener cosechas (puede estar vacío)
+$cosechasController = new CosechasController();
+$cosechas = $cosechasController->index();
 
 // Manejar acciones
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -21,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'horas_trabajadas' => $_POST['horas_trabajadas'],
             'tarifa_hora' => $_POST['tarifa_hora'],
             'actividad_id' => $_POST['actividad_id'],
-            'cosecha_id' => $_POST['cosecha_id'] ?: null
+            'cosecha_id' => $_POST['cosecha_id'] ?? null
         ];
         
         if ($jornalesController->crear($data)) {
@@ -30,6 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             $_SESSION['error'] = 'Error al registrar jornal';
+        }
+    }
+    
+    if ($action === 'pagar') {
+        $id = $_POST['id'] ?? null;
+        if ($id && $jornalesController->marcarPagado($id)) {
+            $_SESSION['success'] = 'Jornal marcado como pagado';
+            header('Location: jornales.php');
+            exit;
         }
     }
 }
@@ -98,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             </div>
 
                                             <div class="row">
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label class="form-label">Actividad *</label>
                                                         <select class="form-select" name="actividad_id" required>
@@ -111,7 +126,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                         </select>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Cosecha</label>
+                                                        <select class="form-select" name="cosecha_id">
+                                                            <option value="">Seleccionar cosecha...</option>
+                                                            <?php foreach ($cosechas as $cosecha): ?>
+                                                            <option value="<?= $cosecha['id'] ?>"><?= $cosecha['nombre'] ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label class="form-label">Total a Pagar</label>
                                                         <input type="text" class="form-control" readonly id="totalPagar">
@@ -130,7 +156,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php if (isset($_SESSION['success'])): ?>
                             <div class="alert alert-success"><?= $_SESSION['success']; unset($_SESSION['success']); ?></div>
                         <?php endif; ?>
-                        
                         <?php if (isset($_SESSION['error'])): ?>
                             <div class="alert alert-danger"><?= $_SESSION['error']; unset($_SESSION['error']); ?></div>
                         <?php endif; ?>
@@ -143,6 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <th>Fecha</th>
                                         <th>Empleado</th>
                                         <th>Actividad</th>
+                                        <th>Cosecha</th>
                                         <th>Horas</th>
                                         <th>Tarifa/Hora</th>
                                         <th>Total</th>
@@ -156,6 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <td><?= date('d/m/Y', strtotime($jornal['fecha_jornal'])) ?></td>
                                         <td>Empleado #<?= $jornal['empleado_id'] ?></td>
                                         <td>Actividad #<?= $jornal['actividad_id'] ?></td>
+                                        <td><?= $jornal['cosecha_id'] ?? 'N/A' ?></td>
                                         <td><?= $jornal['horas_trabajadas'] ?> hrs</td>
                                         <td>$<?= number_format($jornal['tarifa_hora'], 0, ',', '.') ?></td>
                                         <td class="fw-bold">$<?= number_format($jornal['total_pago'], 0, ',', '.') ?></td>
@@ -182,31 +209,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/app.js"></script>
-    <script>
-    // Calcular total automáticamente
-    document.addEventListener('DOMContentLoaded', function() {
-        const horasInput = document.querySelector('input[name="horas_trabajadas"]');
-        const tarifaInput = document.querySelector('input[name="tarifa_hora"]');
-        const totalInput = document.getElementById('totalPagar');
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/app.js"></script>
+<script>
+// Calcular total automáticamente
+document.addEventListener('DOMContentLoaded', function() {
+    const horasInput = document.querySelector('input[name="horas_trabajadas"]');
+    const tarifaInput = document.querySelector('input[name="tarifa_hora"]');
+    const totalInput = document.getElementById('totalPagar');
 
-        function calcularTotal() {
-            const horas = parseFloat(horasInput.value) || 0;
-            const tarifa = parseFloat(tarifaInput.value) || 0;
-            const total = horas * tarifa;
-            totalInput.value = '$' + total.toLocaleString('es-CO');
-        }
-
-        horasInput.addEventListener('input', calcularTotal);
-        tarifaInput.addEventListener('input', calcularTotal);
-    });
-
-    function marcarPagado(jornalId) {
-        if (confirm('¿Está seguro de marcar este jornal como pagado?')) {
-            window.location.href = 'jornales.php?action=pagar&id=' + jornalId;
-        }
+    function calcularTotal() {
+        const horas = parseFloat(horasInput.value) || 0;
+        const tarifa = parseFloat(tarifaInput.value) || 0;
+        const total = horas * tarifa;
+        totalInput.value = '$' + total.toLocaleString('es-CO');
     }
-    </script>
+
+    horasInput.addEventListener('input', calcularTotal);
+    tarifaInput.addEventListener('input', calcularTotal);
+});
+
+function marcarPagado(jornalId) {
+    if (confirm('¿Está seguro de marcar este jornal como pagado?')) {
+        window.location.href = 'jornales.php?action=pagar&id=' + jornalId;
+    }
+}
+</script>
 </body>
 </html>
