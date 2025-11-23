@@ -1,3 +1,73 @@
+# Instrucciones para agentes (Copilot)
+
+Resumen rápido
+
+- Proyecto: `finca_cafetera` — PHP vanilla con arquitectura MVC ligera.
+- Entradas públicas: `public/` (vistas / puntos de entrada). Autoload en `app/autoload.php`.
+
+Arquitectura & motivos clave
+
+- Código PHP sin frameworks: controladores en `app/controllers/`, modelos en `app/models/`, vistas en `public/`.
+- `Database.php` implementa un singleton PDO: todas las conexiones usan la misma instancia.
+- `Model.php` ofrece CRUD genérico y soporte de "soft delete" usando la columna `estado` (`activo`/`inactivo`).
+
+Patrones y convenciones del proyecto
+
+- Modelos: heredan de `Model` y llaman `parent::__construct('nombre_tabla')`.
+  Ejemplo: `app/models/Cliente.php`.
+- Soft delete: `delete()` actualiza `estado = 'inactivo'`. Las consultas genéricas excluyen registros inactivos.
+- Controladores: no deben imprimir salida; retornan datos para que las vistas los rendericen.
+  Ejemplo: `app/controllers/ClientesController.php`.
+- Vistas: archivos PHP simples en `public/`. Incluyen `app/views/components/header.php`.
+- Seguridad: usar `SecurityManager` para CSRF (`_csrf_token`), sanitización y escape de salida.
+
+Flujos comunes y comandos útiles
+
+- Levantar servidor PHP local para desarrollo:
+  `php -S localhost:8000 -t public`
+- Importar DB de desarrollo:
+  `mysql -u root finca_cafetera < database/finca_cafetera2.sql`
+- Las variables de entorno se cargan vía `app/helpers/EnvLoader.php` y son usadas por `app/config/database.php`.
+
+Puntos de integración importantes
+
+- Sesión: `$_SESSION['usuario']` contiene `[id, username, nombre_completo, rol]`. Autorización verificable con `AuthController::checkAuth()`.
+- CSRF: todos los formularios POST usan `_csrf_token` validado por `SecurityManager`.
+- Cookies/Remember-me: gestionadas por `SecurityManager` con atributos `HttpOnly`, `Secure`, `SameSite=Strict`.
+
+Qué editar y cómo añadir características
+
+- Añadir un nuevo CRUD:
+  1. Crear `app/models/TuModelo.php` extendiendo `Model`.
+  2. Crear `app/controllers/TuModeloController.php` con métodos `index()`, `crear()`, `actualizar()`, `eliminar()`.
+  3. Nueva vista en `public/tu_modelo.php` que `require_once '../app/controllers/TuModeloController.php';` y llama al controller.
+- Para consultas personalizadas usar prepared statements (`$this->db->prepare()` o `$this->query()` del `Model`).
+
+Buenas prácticas específicas (descubiertas en el repo)
+
+- Siempre filtrar `estado = 'activo'` en queries ad-hoc.
+- Validación de entrada en controladores; modelos solo persisten.
+- Reutilizar `app/views/components/header.php` en vistas públicas para mantener menú y sesión.
+
+Limitaciones y cosas a tener en cuenta
+
+- No hay tests automatizados ni pipeline de CI definido.
+- No hay composer / dependencias externas — todo es PHP + PDO.
+- Las credenciales por defecto están en `app/config/database.php` para desarrollo local; producción usa `.env` (no versionado).
+
+Dónde mirar primero
+
+- `app/autoload.php`, `app/config/database.php`, `app/models/Model.php`, `app/models/Database.php`,
+  `app/controllers/AuthController.php`, `app/models/SecurityManager.php`, y `public/index.php`.
+
+Si algo no está claro
+
+- Dime qué sección quieres que amplíe: autenticación, patrón Model/Controller, CSRF, o ejemplo concreto de CRUD.
+
+---
+
+Por favor revisa y dime si quieres que incluya ejemplos de código concretos o pasos de debugging adicionales.
+
 # Copilot Instructions - Finca Cafetera
 
 ## Architecture Overview

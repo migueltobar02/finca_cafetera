@@ -29,4 +29,15 @@ spl_autoload_register(function ($className) {
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/models/Database.php';
 require_once __DIR__ . '/models/SecurityManager.php';
+// Inicializar políticas de cookies y cabeceras de seguridad lo antes posible
+try {
+    // Configurar parámetros de cookies de sesión antes de iniciar
+    if (class_exists('SecurityManager')) {
+        SecurityManager::configureSessionCookies();
+        SecurityManager::initSession();
+        SecurityManager::setSecurityHeaders();
+    }
+} catch (Throwable $e) {
+    // No bloquear la carga si algo falla; el entorno hospedado deberá revisar logs
+}
 ?>

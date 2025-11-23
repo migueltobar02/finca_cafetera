@@ -2,12 +2,8 @@
 /**
  * Header común para todas las páginas
  */
-require_once __DIR__ . '/../../../app/models/SecurityManager.php';
-
-// Inicializar seguridad
-SecurityManager::initSession();
-SecurityManager::setSecurityHeaders();
-
+// `SecurityManager` y la sesión deben inicializarse por el entrypoint (p.ej. `app/autoload.php`)
+// Aquí asumimos que la sesión ya está activa y `SecurityManager` disponible.
 $usuario = $_SESSION['usuario'] ?? null;
 ?>
 <!DOCTYPE html>
