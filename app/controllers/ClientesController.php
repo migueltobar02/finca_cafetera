@@ -17,46 +17,46 @@ class ClientesController {
 
     public function crear($data) {
 
-    // FIX importante: si llegan dos inputs con el mismo name, PHP lo trata como array
-    if (is_array($data['numero_identificacion'])) {
-        $data['numero_identificacion'] = $data['numero_identificacion'][0];
+        // FIX importante: si llegan dos inputs con el mismo name, PHP lo trata como array
+        if (is_array($data['numero_identificacion'])) {
+            $data['numero_identificacion'] = $data['numero_identificacion'][0];
+        }
+
+        // Validación: numero_identificacion es obligatorio
+        if (empty($data['numero_identificacion'])) {
+            throw new Exception("El número de identificación es obligatorio.");
+        }
+
+        // Quitar espacios
+        $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
+        return $this->clienteModel->create($data);
     }
 
-    // Validación: numero_identificacion es obligatorio
-    if (empty($data['numero_identificacion'])) {
-        throw new Exception("El número de identificación es obligatorio.");
+
+    public function actualizar($id, $data) {
+
+        if (empty($data['numero_identificacion'])) {
+            throw new Exception("El número de identificación es obligatorio.");
+        }
+
+        $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
+        // Aquí corregimos el error del getConnection()
+        $db = Database::getInstance();  // ya es un PDO
+
+        // Validación: verificar si el número de identificación ya existe en otro cliente
+        // *** ESTA ES LA LÍNEA CORRECTA ***
+        $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$data['numero_identificacion'], $id]);
+
+        if ($stmt->fetch()) {
+            throw new Exception("El número de identificación ya está registrado por otro cliente.");
+        }
+
+        return $this->clienteModel->update($id, $data);
     }
-
-    // Quitar espacios
-    $data['numero_identificacion'] = trim($data['numero_identificacion']);
-
-    return $this->clienteModel->create($data);
-}
-
-
-   public function actualizar($id, $data) {
-
-    if (empty($data['numero_identificacion'])) {
-        throw new Exception("El número de identificación es obligatorio.");
-    }
-
-    $data['numero_identificacion'] = trim($data['numero_identificacion']);
-
-    // Aquí corregimos el error del getConnection()
-    $db = Database::getInstance();  // ya es un PDO
-
-    // Validación: verificar si el número de identificación ya existe en otro cliente
-    $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
-    $stmt = $db->prepare($sql);
-    $stmt->execute([$data['numero_identificacion'], $id]);
-
-    if ($stmt->fetch()) {
-        throw new Exception("El número de identificación ya está registrado por otro cliente.");
-    }
-
-    return $this->clienteModel->update($id, $data);
-}
-
 
 
     public function eliminar($id) {
