@@ -48,8 +48,7 @@ try {
 <body>
     <?php 
     $titulo = 'Reportes y Análisis';
-    include '../app/views/components/header.php'; 
-    ?>
+    include __DIR__ . '/app/views/components/header.php'; ?>
 
     <div class="container mt-4">
         <div class="row">

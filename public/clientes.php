@@ -26,7 +26,7 @@ if (isset($_GET['buscar']) && !empty($_GET['termino'])) {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <?php include '../app/views/components/header.php'; ?>
+    <?php include __DIR__ . '/app/views/components/header.php'; ?>
 
     <div class="container mt-4">
         <div class="row">

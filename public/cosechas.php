@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <?php include '../app/views/components/header.php'; ?>
+    <?php include __DIR__ . '/app/views/components/header.php'; ?>
 
     <div class="container mt-4">
         <div class="row">

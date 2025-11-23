@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
     <?php 
     $titulo = 'Registro de Ventas';
-    include '../app/views/components/header.php'; 
+    include __DIR__ . '/app/views/components/header.php';
     ?>
 
     <div class="container mt-4">
