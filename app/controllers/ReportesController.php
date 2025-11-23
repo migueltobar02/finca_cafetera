@@ -55,7 +55,7 @@ class ReportesController {
                 ORDER BY ano DESC, mes DESC
                 LIMIT " . (int)$meses;
         
-        $db = Database::getInstance()->getConnection();
+       $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
@@ -101,12 +101,13 @@ class ReportesController {
     }
 
     private function getIngresosPorMes($ano, $mes) {
+
         $sql = "SELECT COALESCE(SUM(monto), 0) as total 
                 FROM ingresos 
                 WHERE YEAR(fecha_ingreso) = ? 
                 AND MONTH(fecha_ingreso) = ?";
         
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute([$ano, $mes]);
         $result = $stmt->fetch();

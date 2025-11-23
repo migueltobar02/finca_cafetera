@@ -44,7 +44,7 @@ class CosechasController {
                 FROM cosechas 
                 WHERE MONTH(fecha_cosecha) = MONTH(CURRENT_DATE())";
         
-        $db = Database::getInstance()->getConnection();
+       $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetch();
