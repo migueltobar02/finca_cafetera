@@ -143,7 +143,13 @@ try {
                                                 <div class="card text-white bg-warning">
                                                     <div class="card-body text-center">
                                                         <h6>Cosechas</h6>
-                                                        <h4><?= number_format($resumenMensual['cosechas'], 0, ',', '.') ?> kg</h4>
+                                                        <h4><?php 
+                                                        $valor = is_array($estadisticas['total'])
+                                                            ? ($estadisticas['total']['total'] ?? 0)
+                                                            : $estadisticas['total'];
+                                                        ?>
+                                                        <?= number_format($valor, 0, ',', '.') ?> kg
+                                                        </h4>
                                                     </div>
                                                 </div>
                                             </div>

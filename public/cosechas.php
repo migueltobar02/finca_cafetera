@@ -148,7 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="card-body">
                                         <h5 class="card-title">Rendimiento Promedio</h5>
                                         <h2 class="card-text">
-                                            <?= number_format($estadisticas['rendimiento_promedio'], 1, ',', '.') ?> kg/ha
+                                            <?php 
+                                                $prom = is_array($estadisticas['rendimiento_promedio']) 
+                                                    ? ($estadisticas['rendimiento_promedio']['promedio'] ?? 0)
+                                                    : $estadisticas['rendimiento_promedio'];
+                                                ?>
+                                                <?= number_format($prom, 1, ',', '.') ?> kg/ha
                                         </h2>
                                     </div>
                                 </div>
