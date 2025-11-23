@@ -119,7 +119,7 @@ class ReportesController {
                 WHERE YEAR(fecha_egreso) = ? 
                 AND MONTH(fecha_egreso) = ?";
         
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute([$ano, $mes]); // pasas año y mes, no $termino
         $result = $stmt->fetch(PDO::FETCH_ASSOC); // un solo registro

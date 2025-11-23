@@ -52,15 +52,14 @@ class CosechasController {
     }
 
     private function getDistribucionCalidad() {
+        $db = Database::getInstance();
         $sql = "SELECT calidad, COUNT(*) as cantidad, SUM(kilos_cosechados) as kilos
                 FROM cosechas
                 WHERE MONTH(fecha_cosecha) = MONTH(CURRENT_DATE())
                 GROUP BY calidad";
-        
-        $db = Database::getInstance()->getConnection();
+    
         $stmt = $db->prepare($sql);
-        $termino = "%$termino%";
-        $stmt->execute([$termino, $termino, $termino, $termino]);
+        $stmt->execute();
         return $stmt->fetchAll();
     }
 }
