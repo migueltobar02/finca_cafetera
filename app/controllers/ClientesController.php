@@ -34,7 +34,7 @@ class ClientesController {
 }
 
 
-    public function actualizar($id, $data) {
+   public function actualizar($id, $data) {
 
     if (empty($data['numero_identificacion'])) {
         throw new Exception("El número de identificación es obligatorio.");
@@ -42,8 +42,10 @@ class ClientesController {
 
     $data['numero_identificacion'] = trim($data['numero_identificacion']);
 
+    // Aquí corregimos el error del getConnection()
+    $db = Database::getInstance();  // ya es un PDO
+
     // Validación: verificar si el número de identificación ya existe en otro cliente
-    $db = Database::getInstance()->getConnection();
     $sql = "SELECT id FROM clientes WHERE numero_identificacion = ? AND id != ?";
     $stmt = $db->prepare($sql);
     $stmt->execute([$data['numero_identificacion'], $id]);
