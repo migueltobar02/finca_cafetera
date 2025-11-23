@@ -1,12 +1,12 @@
 <?php
-require_once '../app/controllers/AuthController.php';
-require_once '../app/controllers/EmpleadosController.php';
+// Cargar el autoloader del proyecto (resuelve rutas desde la raíz del repo)
+require_once __DIR__ . '/../app/autoload.php';
 
 $auth = new AuthController();
 $usuario = $auth->checkAuth();
 
-$empleadosController = new EmpleadosController();
-$empleados = $empleadosController->index();
+    $empleadosController = new EmpleadosController();
+    $empleados = $empleadosController->index();
 
 // Manejar acciones
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <?php include '../app/views/components/header.php'; ?>
+    <?php include __DIR__ . '/../app/views/components/header.php'; ?>
 
     <div class="container mt-4">
         <div class="row">
