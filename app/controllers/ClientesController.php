@@ -17,27 +17,38 @@ class ClientesController {
 
     public function crear($data) {
 
-        // Validación: numero_identificacion es obligatorio
-        if (empty($data['numero_identificacion'])) {
-            throw new Exception("El número de identificación es obligatorio.");
-        }
-
-        // Validación para evitar valores vacíos que violen el UNIQUE
-        $data['numero_identificacion'] = trim($data['numero_identificacion']);
-
-        return $this->clienteModel->create($data);
+    // FIX importante: si llegan dos inputs con el mismo name, PHP lo trata como array
+    if (is_array($data['numero_identificacion'])) {
+        $data['numero_identificacion'] = $data['numero_identificacion'][0];
     }
+
+    // Validación: numero_identificacion es obligatorio
+    if (empty($data['numero_identificacion'])) {
+        throw new Exception("El número de identificación es obligatorio.");
+    }
+
+    // Quitar espacios
+    $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
+    return $this->clienteModel->create($data);
+}
+
 
     public function actualizar($id, $data) {
 
-        if (empty($data['numero_identificacion'])) {
-            throw new Exception("El número de identificación es obligatorio.");
-        }
-
-        $data['numero_identificacion'] = trim($data['numero_identificacion']);
-
-        return $this->clienteModel->update($id, $data);
+    if (is_array($data['numero_identificacion'])) {
+        $data['numero_identificacion'] = $data['numero_identificacion'][0];
     }
+
+    if (empty($data['numero_identificacion'])) {
+        throw new Exception("El número de identificación es obligatorio.");
+    }
+
+    $data['numero_identificacion'] = trim($data['numero_identificacion']);
+
+    return $this->clienteModel->update($id, $data);
+}
+
 
     public function eliminar($id) {
         return $this->clienteModel->delete($id);
