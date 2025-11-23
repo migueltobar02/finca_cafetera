@@ -1,6 +1,6 @@
 <?php
-require_once '../app/controllers/AuthController.php';
-require_once '../app/controllers/ReportesController.php';
+require_once __DIR__ . '/app/controllers/AuthController.php';
+require_once __DIR__ . '/app/controllers/ReportesController.php';
 
 $auth = new AuthController();
 $usuario = $auth->checkAuth();

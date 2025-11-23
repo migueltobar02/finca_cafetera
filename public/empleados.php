@@ -1,6 +1,6 @@
 <?php
 // Cargar el autoloader del proyecto (resuelve rutas desde la raíz del repo)
-require_once __DIR__ . '/../app/autoload.php';
+require_once __DIR__ . '/app/autoload.php';
 
 $auth = new AuthController();
 $usuario = $auth->checkAuth();
