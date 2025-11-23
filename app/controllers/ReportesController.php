@@ -44,7 +44,8 @@ class ReportesController {
     }
 
     public function getComparativoMensual($meses = 6) {
-        $sql = "SELECT 
+        // CORREGIDO: LIMIT con concatenación
+         $sql = "SELECT 
                     EXTRACT(YEAR FROM fecha_ingreso) as ano,
                     EXTRACT(MONTH FROM fecha_ingreso) as mes,
                     COALESCE(SUM(monto), 0) as ingresos
@@ -54,12 +55,13 @@ class ReportesController {
                 ORDER BY ano DESC, mes DESC
                 LIMIT " . (int)$meses;
         
-        $db = Database::getInstance();
+       $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
+    // Método alternativo más simple (ya corregido)
     public function getComparativoSimple($meses = 6) {
         $resultados = [];
         
@@ -69,6 +71,7 @@ class ReportesController {
             $mes = date('m', strtotime("-$i months"));
             $mesNombre = $this->getNombreMes($mes);
             
+            // Obtener ingresos del mes
             $ingresos = $this->getIngresosPorMes($ano, $mes);
             $egresos = $this->getEgresosPorMes($ano, $mes);
             $utilidad = $ingresos - $egresos;
@@ -98,6 +101,7 @@ class ReportesController {
     }
 
     private function getIngresosPorMes($ano, $mes) {
+
         $sql = "SELECT COALESCE(SUM(monto), 0) as total
                 FROM ingresos
                 WHERE EXTRACT(YEAR FROM fecha_ingreso) = ?
@@ -115,12 +119,11 @@ class ReportesController {
                 FROM egresos
                 WHERE EXTRACT(YEAR FROM fecha_egreso) = ?
                   AND EXTRACT(MONTH FROM fecha_egreso) = ?";
-        
         $db = Database::getInstance();
         $stmt = $db->prepare($sql);
-        $stmt->execute([$ano, $mes]);
-        $result = $stmt->fetch();
-        return $result['total'] ?? 0;
+        $stmt->execute([$ano, $mes]); // pasas año y mes, no $termino
+        $result = $stmt->fetch(PDO::FETCH_ASSOC); // un solo registro
+        return $result['total'] ?? 0; // devuelve el total correctamente
     }
 }
 ?>

@@ -39,18 +39,17 @@ class CosechasController {
         ];
     }
 
-    private function getRendimientoPromedio() {
-        $sql = "SELECT AVG(rendimiento) as promedio
-                FROM cosechas
-                WHERE EXTRACT(MONTH FROM fecha_cosecha) = EXTRACT(MONTH FROM CURRENT_DATE)
-                  AND EXTRACT(YEAR FROM fecha_cosecha) = EXTRACT(YEAR FROM CURRENT_DATE)";
-        
-        $db = Database::getInstance()->getConnection();
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['promedio'] ?? 0;
-    }
+        private function getRendimientoPromedio() {
+            $sql = "SELECT AVG(rendimiento) as promedio 
+                    FROM cosechas 
+                    WHERE EXTRACT(MONTH FROM fecha_cosecha) = EXTRACT(MONTH FROM CURRENT_DATE)";
+            
+            $db = Database::getInstance(); // aquí estaba el error
+            $stmt = $db->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->fetch();
+            return $result['promedio'] ?? 0;
+        }
 
     private function getDistribucionCalidad() {
         $sql = "SELECT calidad, COUNT(*) as cantidad, SUM(kilos_cosechados) as kilos
@@ -59,7 +58,7 @@ class CosechasController {
                   AND EXTRACT(YEAR FROM fecha_cosecha) = EXTRACT(YEAR FROM CURRENT_DATE)
                 GROUP BY calidad";
     
-        $db = Database::getInstance()->getConnection();
+        $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
