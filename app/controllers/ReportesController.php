@@ -121,9 +121,9 @@ class ReportesController {
         
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare($sql);
-        $stmt->execute([$ano, $mes]);
-        $result = $stmt->fetch();
-        return $result['total'] ?? 0;
+        $stmt->execute([$ano, $mes]); // pasas año y mes, no $termino
+        $result = $stmt->fetch(PDO::FETCH_ASSOC); // un solo registro
+        return $result['total'] ?? 0; // devuelve el total correctamente
     }
 }
 ?>

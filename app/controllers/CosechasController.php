@@ -59,7 +59,8 @@ class CosechasController {
         
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare($sql);
-        $stmt->execute();
+        $termino = "%$termino%";
+        $stmt->execute([$termino, $termino, $termino, $termino]);
         return $stmt->fetchAll();
     }
 }
