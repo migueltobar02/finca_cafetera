@@ -81,8 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
 
                         <form method="POST" action="cliente_form.php<?= isset($_GET['id']) ? '?id=' . $_GET['id'] : '' ?>">
-                            <?php include(__DIR__ . '/app/views/clientes/form.php');
-?>
+                            <?php include(__DIR__ . '/app/views/clientes/form.php'); ?>
                             
                             <div class="row mt-4">
                                 <div class="col-12">
@@ -100,23 +99,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+    // Al cambiar la entidad, habilitar los campos correctos
     document.getElementById('tipoEntidad').addEventListener('change', function() {
-    const tipo = this.value;
+        const tipo = this.value;
 
-    const camposPersona = document.querySelectorAll('#camposPersona input, #camposPersona select');
-    const camposEmpresa = document.querySelectorAll('#camposEmpresa input, #camposEmpresa select');
+        const camposPersona = document.querySelectorAll('#camposPersona input, #camposPersona select');
+        const camposEmpresa = document.querySelectorAll('#camposEmpresa input, #camposEmpresa select');
 
-    // Deshabilitar todos primero
-    camposPersona.forEach(f => f.disabled = true);
-    camposEmpresa.forEach(f => f.disabled = true);
+        camposPersona.forEach(f => f.disabled = true);
+        camposEmpresa.forEach(f => f.disabled = true);
 
-    if (tipo === 'persona') {
-        camposPersona.forEach(f => f.disabled = false);
-    } else if (tipo === 'empresa') {
-        camposEmpresa.forEach(f => f.disabled = false);
-    }
-});
-</script>
+        if (tipo === 'persona') {
+            camposPersona.forEach(f => f.disabled = false);
+        } else if (tipo === 'empresa') {
+            camposEmpresa.forEach(f => f.disabled = false);
+        }
+    });
+
+    // FIX: al cargar la página habilitar los campos correctos (para EDITAR)
+    window.addEventListener('DOMContentLoaded', function() {
+        const tipo = document.getElementById('tipoEntidad').value;
+
+        const camposPersona = document.querySelectorAll('#camposPersona input, #camposPersona select');
+        const camposEmpresa = document.querySelectorAll('#camposEmpresa input, #camposEmpresa select');
+
+        camposPersona.forEach(f => f.disabled = true);
+        camposEmpresa.forEach(f => f.disabled = true);
+
+        if (tipo === 'persona') {
+            camposPersona.forEach(f => f.disabled = false);
+        } else if (tipo === 'empresa') {
+            camposEmpresa.forEach(f => f.disabled = false);
+        }
+    });
+    </script>
 </body>
 </html>
