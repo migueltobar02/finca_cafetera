@@ -43,9 +43,22 @@ class ReportesController {
         ];
     }
 
+    // Método para estadísticas de cosechas (total)
+    public function getEstadisticas() {
+        $sql = "SELECT COALESCE(SUM(kilos_cosechados), 0) as total
+                FROM cosechas";
+        $db = Database::getInstance();
+        $stmt = $db->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'total' => $result['total'] ?? 0
+        ];
+    }
+
     public function getComparativoMensual($meses = 6) {
-        // CORREGIDO: LIMIT con concatenación
-         $sql = "SELECT 
+        $sql = "SELECT 
                     EXTRACT(YEAR FROM fecha_ingreso) as ano,
                     EXTRACT(MONTH FROM fecha_ingreso) as mes,
                     COALESCE(SUM(monto), 0) as ingresos
@@ -55,13 +68,12 @@ class ReportesController {
                 ORDER BY ano DESC, mes DESC
                 LIMIT " . (int)$meses;
         
-       $db = Database::getInstance();
+        $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    // Método alternativo más simple (ya corregido)
     public function getComparativoSimple($meses = 6) {
         $resultados = [];
         
@@ -71,7 +83,6 @@ class ReportesController {
             $mes = date('m', strtotime("-$i months"));
             $mesNombre = $this->getNombreMes($mes);
             
-            // Obtener ingresos del mes
             $ingresos = $this->getIngresosPorMes($ano, $mes);
             $egresos = $this->getEgresosPorMes($ano, $mes);
             $utilidad = $ingresos - $egresos;
@@ -101,16 +112,14 @@ class ReportesController {
     }
 
     private function getIngresosPorMes($ano, $mes) {
-
         $sql = "SELECT COALESCE(SUM(monto), 0) as total
                 FROM ingresos
                 WHERE EXTRACT(YEAR FROM fecha_ingreso) = ?
                   AND EXTRACT(MONTH FROM fecha_ingreso) = ?";
-        
         $db = Database::getInstance();
         $stmt = $db->prepare($sql);
         $stmt->execute([$ano, $mes]);
-        $result = $stmt->fetch();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result['total'] ?? 0;
     }
 
@@ -121,9 +130,8 @@ class ReportesController {
                   AND EXTRACT(MONTH FROM fecha_egreso) = ?";
         $db = Database::getInstance();
         $stmt = $db->prepare($sql);
-        $stmt->execute([$ano, $mes]); // pasas año y mes, no $termino
-        $result = $stmt->fetch(PDO::FETCH_ASSOC); // un solo registro
-        return $result['total'] ?? 0; // devuelve el total correctamente
+        $stmt->execute([$ano, $mes]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'] ?? 0;
     }
 }
-?>
