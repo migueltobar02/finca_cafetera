@@ -7,6 +7,9 @@ $usuario = $auth->checkAuth();
 
 $reportesController = new ReportesController();
 
+// Inicializar estadísticas para evitar errores
+$estadisticas = $reportesController->getEstadisticas() ?? ['total' => 0];
+
 // Parámetros por defecto
 $fechaInicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
 $fechaFin = $_GET['fecha_fin'] ?? date('Y-m-d');
@@ -328,12 +331,10 @@ try {
     <script>
     function exportarPDF() {
         alert('Funcionalidad de exportación PDF en desarrollo');
-        // En una implementación real, aquí se generaría el PDF
     }
 
     function exportarExcel() {
         alert('Funcionalidad de exportación Excel en desarrollo');
-        // En una implementación real, aquí se generaría el Excel
     }
     </script>
 </body>

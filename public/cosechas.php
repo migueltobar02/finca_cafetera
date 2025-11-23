@@ -138,7 +138,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="card-body">
                                         <h5 class="card-title">Total Mes</h5>
                                         <h2 class="card-text">
-                                            <?= number_format($estadisticas['total_cosechado'], 0, ',', '.') ?> kg
+                                            <?php 
+                                                $total = is_array($estadisticas['total_cosechado']) 
+                                                    ? ($estadisticas['total_cosechado']['total'] ?? 0) 
+                                                    : $estadisticas['total_cosechado'];
+                                            ?>
+                                            <?= number_format($total, 0, ',', '.') ?> kg
                                         </h2>
                                     </div>
                                 </div>
@@ -152,8 +157,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                 $prom = is_array($estadisticas['rendimiento_promedio']) 
                                                     ? ($estadisticas['rendimiento_promedio']['promedio'] ?? 0)
                                                     : $estadisticas['rendimiento_promedio'];
-                                                ?>
-                                                <?= number_format($prom, 1, ',', '.') ?> kg/ha
+                                            ?>
+                                            <?= number_format($prom, 1, ',', '.') ?> kg/ha
                                         </h2>
                                     </div>
                                 </div>
