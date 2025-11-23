@@ -132,11 +132,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                                         <select class="form-select" name="cosecha_id">
                                                             <option value="">Seleccionar cosecha...</option>
                                                             <?php foreach ($cosechas as $cosecha): ?>
-                                                            <option value="<?= $cosecha['id'] ?>"><?= $cosecha['nombre'] ?></option>
+                                                                <option value="<?= $cosecha['id'] ?>">
+                                                                    <?= 'Cosecha ' . $cosecha['id'] . ' - ' . $cosecha['fecha_cosecha'] ?>
+                                                                </option>
                                                             <?php endforeach; ?>
                                                         </select>
                                                     </div>
                                                 </div>
+
                                                 <div class="col-md-4">
                                                     <div class="mb-3">
                                                         <label class="form-label">Total a Pagar</label>
